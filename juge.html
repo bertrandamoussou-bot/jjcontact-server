@@ -572,7 +572,7 @@ function showErrScr(msg){
 
 // ══ INIT VOTE ════════════════════════════════════════
 function initVote(){
-  var nR=jSt.fmt==='gala'?3:1;
+  var nR=(jSt.fmt==='gala'&&!jSt.isOvertime)?3:1;
   jRounds=Array.from({length:nR},function(){return{rs:9,bs:9,rp:0,bp:0};});
   jRound=0; jSt.method=null; jSt.vote=null;
   document.getElementById('v-judge-tag').textContent=jSt.judgeId;
