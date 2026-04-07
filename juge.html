@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JJContact — Juge</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap');
+:root {
+  --red:#C8102E; --red-bg:#FEF2F2; --red-mid:#FECACA;
+  --blue:#1D4ED8; --blue-bg:#EFF6FF; --blue-mid:#BFDBFE;
+  --navy:#0C1F5E;
+  --bg:#F5F0E8; --white:#FDFAF5;
+  --border:#E2E8F0; --b2:#CBD5E1;
+  --text:#0F172A; --t2:#475569; --t3:#94A3B8;
+  --green:#059669; --green-bg:#ECFDF5;
+  --orange:#D97706; --gold:#B45309; --gold-bg:#FFFBEB;
+  --r:12px; --r2:16px;
+  --sh:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --sh2:0 4px 16px rgba(0,0,0,0.10),0 2px 4px rgba(0,0,0,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;height:100dvh;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;overflow:hidden;touch-action:manipulation;}
+.screen{display:none;width:100%;height:100vh;height:100dvh;flex-direction:column;align-items:center;justify-content:center;}
+.screen.active{display:flex;}
+
+/* ── CONNECT ── */
+#s-connect{background:var(--bg);}
+.connect-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:32px 24px;width:min(400px,94vw);box-shadow:var(--sh2);}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--navy);text-align:center;margin-bottom:2px;}
+.logo span{color:var(--red);}
+.logo-sub{font-size:10px;color:var(--t3);letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:18px;}
+.sep{height:1px;background:var(--border);margin:0 0 20px;}
+.fl{display:block;font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:6px;}
+.fi{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;outline:none;transition:border-color .15s;margin-bottom:14px;}
+.fi:focus{border-color:var(--blue);background:var(--white);}
+.fi::placeholder{color:var(--t3);}
+.btn-primary{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:4px;transition:background .15s;box-shadow:0 2px 8px rgba(12,31,94,0.2);}
+.btn-primary:hover{background:#0D2577;}
+.btn-primary:disabled{opacity:0.45;cursor:not-allowed;}
+.err-msg{color:var(--red);font-size:12px;font-weight:600;text-align:center;min-height:16px;margin-top:6px;}
+.connect-hint{font-size:11px;color:var(--t3);text-align:center;margin-top:12px;line-height:1.6;}
+
+/* ── WAITING ── */
+#s-waiting{background:var(--bg);}
+.wait-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:32px 24px;width:min(380px,92vw);text-align:center;box-shadow:var(--sh2);}
+.wait-icon{font-size:40px;margin-bottom:10px;}
+.wait-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--navy);margin-bottom:6px;}
+.wait-sub{font-size:13px;color:var(--t2);line-height:1.6;}
+.wait-fighters{display:flex;align-items:center;justify-content:center;gap:10px;margin-top:16px;padding:12px 14px;background:var(--bg);border-radius:var(--r);}
+.wf-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;}
+.wf-name.red{color:var(--red);}
+.wf-name.blue{color:var(--blue);}
+.wf-vs{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--t3);}
+.conn-badge{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);border:1px solid #A7F3D0;border-radius:20px;padding:5px 12px;font-size:11px;color:var(--green);font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ── VOTE ── */
+#s-vote{background:var(--bg);justify-content:flex-start;overflow-y:auto;align-items:stretch;}
+.vote-wrap{width:min(480px,96vw);margin:0 auto;display:flex;flex-direction:column;gap:10px;padding:12px 0 32px;}
+.vote-topbar{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;box-shadow:var(--sh);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+.vote-judge-tag{font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:1px;font-weight:600;}
+.vote-fmt-tag{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;background:var(--navy);color:#fff;padding:3px 10px;border-radius:6px;}
+.vote-fighters{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);box-shadow:var(--sh);overflow:hidden;}
+.vote-fighters-hdr{background:var(--navy);padding:7px 14px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.6);}
+.vote-fighters-names{display:flex;align-items:center;padding:10px 14px;gap:10px;}
+.vfname{flex:1;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:900;text-transform:uppercase;}
+.vfname.red{color:var(--red);}
+.vfname.blue{color:var(--blue);}
+.vfvs{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--t3);flex-shrink:0;}
+
+/* Step nav */
+.step-nav{display:flex;align-items:center;justify-content:space-between;padding:4px 0;}
+.step-nav-left{display:flex;align-items:center;gap:8px;}
+.step-back-btn{font-size:12px;color:var(--t3);cursor:pointer;padding:4px 8px;border-radius:6px;background:transparent;border:none;font-family:'Barlow',sans-serif;}
+.step-back-btn:hover{color:var(--t2);}
+.step-title{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--navy);}
+.step-dots{display:flex;gap:5px;}
+.step-dot{width:7px;height:7px;border-radius:50%;background:var(--border);transition:all .2s;}
+.step-dot.active{background:var(--navy);}
+.step-dot.done{background:var(--green);}
+.step{display:none;}
+.step.active{display:block;}
+
+/* Method */
+.method-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px;}
+.method-full{grid-column:1/-1;}
+.method-btn{padding:15px 10px;border-radius:var(--r);cursor:pointer;user-select:none;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:1px;text-align:center;border:2px solid var(--border);background:var(--bg);color:var(--t2);transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.method-btn:active{transform:scale(0.97);}
+.method-btn-icon{font-size:22px;}
+.method-btn-sub{font-size:10px;font-weight:400;font-family:'Barlow',sans-serif;text-transform:none;letter-spacing:0;color:var(--t3);}
+.method-btn.sel{background:var(--navy);border-color:var(--navy);color:#fff;}
+.method-btn.sel .method-btn-sub{color:rgba(255,255,255,0.55);}
+
+/* Score */
+.score-section{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);box-shadow:var(--sh);overflow:hidden;}
+.score-section-hdr{background:var(--navy);padding:8px 14px;display:flex;align-items:center;justify-content:space-between;}
+.score-section-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.75);}
+.score-round-badge{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:#fff;background:rgba(255,255,255,0.15);padding:3px 10px;border-radius:5px;}
+.rtabs{display:flex;background:var(--bg);border-bottom:1px solid var(--border);}
+.rtab{flex:1;padding:7px 4px;text-align:center;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);border-bottom:3px solid transparent;transition:all .15s;user-select:none;}
+.rtab.active{color:var(--navy);border-bottom-color:var(--red);}
+.rtab.scored{color:var(--green);}
+.score-grid{display:grid;grid-template-columns:1fr auto 1fr;}
+.score-col{padding:10px 8px;display:flex;flex-direction:column;gap:8px;}
+.score-col.red-col{background:rgba(200,16,46,0.03);border-right:1px solid var(--border);}
+.score-col.blue-col{background:rgba(29,78,216,0.03);}
+.score-col-hdr{text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:900;text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;border-bottom:1px solid var(--border);}
+.score-col.red-col .score-col-hdr{color:var(--red);}
+.score-col.blue-col .score-col-hdr{color:var(--blue);}
+.score-labels{display:flex;flex-direction:column;gap:8px;padding:10px 5px;border-right:1px solid var(--border);}
+.score-row-label{font-size:10px;color:var(--t2);font-weight:600;text-transform:uppercase;letter-spacing:1px;text-align:center;height:38px;display:flex;align-items:center;justify-content:center;}
+.score-row-label:first-child{padding-top:26px;}
+.srow{height:38px;display:flex;align-items:center;justify-content:center;}
+.score-pills{display:flex;gap:4px;}
+.spill{padding:5px 7px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:var(--t2);cursor:pointer;transition:all .12s;user-select:none;}
+.spill:active{transform:scale(0.95);}
+.red-col .spill.sel{background:var(--red);border-color:var(--red);color:#fff;}
+.blue-col .spill.sel{background:var(--blue);border-color:var(--blue);color:#fff;}
+.pen-counter{display:flex;align-items:center;gap:5px;}
+.pen-val{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;color:var(--orange);min-width:20px;text-align:center;}
+.pen-btn{width:24px;height:24px;border-radius:5px;border:1.5px solid #FDE68A;background:var(--gold-bg);color:var(--gold);font-size:15px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;user-select:none;line-height:1;}
+.pen-btn:active{transform:scale(0.92);}
+.running-score{background:var(--bg);border-top:1px solid var(--border);padding:8px 14px;display:flex;align-items:center;justify-content:center;gap:12px;}
+.rs-box{text-align:center;}
+.rs-val{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:900;line-height:1;}
+.rs-box.red-rs .rs-val{color:var(--red);}
+.rs-box.blue-rs .rs-val{color:var(--blue);}
+.rs-name{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-top:1px;}
+.rs-box.red-rs .rs-name{color:var(--red);}
+.rs-box.blue-rs .rs-name{color:var(--blue);}
+.rs-sep{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--t3);}
+.rs-note{font-size:10px;color:var(--t3);text-align:center;padding:0 14px 6px;}
+
+/* Quick win */
+.quick-win-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:16px;box-shadow:var(--sh);}
+.method-pill{display:inline-block;background:#FEF9ED;border:1px solid #FDE68A;border-radius:8px;padding:5px 12px;font-size:12px;color:var(--orange);font-weight:600;text-align:center;margin-bottom:12px;width:100%;}
+.vote-btns-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.vote-btn{padding:22px 10px;border-radius:var(--r2);cursor:pointer;user-select:none;font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:900;text-transform:uppercase;letter-spacing:1px;transition:all .15s;display:flex;flex-direction:column;align-items:center;gap:4px;border:3px solid transparent;box-shadow:var(--sh);}
+.vote-btn:active{transform:scale(0.97);}
+.vote-btn-sub{font-size:11px;font-weight:500;font-family:'Barlow',sans-serif;text-transform:none;letter-spacing:0;opacity:0.7;}
+.vote-btn.red-btn{background:var(--red-bg);border-color:var(--red-mid);color:var(--red);}
+.vote-btn.blue-btn{background:var(--blue-bg);border-color:var(--blue-mid);color:var(--blue);}
+.vote-btn.red-btn.selected{background:var(--red);color:#fff;border-color:var(--red);box-shadow:0 4px 16px rgba(200,16,46,0.35);}
+.vote-btn.blue-btn.selected{background:var(--blue);color:#fff;border-color:var(--blue);box-shadow:0 4px 16px rgba(29,78,216,0.35);}
+
+/* Step 2 winner */
+.card-block{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:14px;box-shadow:var(--sh);}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.score-recap{background:var(--bg);border-radius:8px;padding:8px;text-align:center;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;margin-bottom:12px;line-height:1.5;}
+.draw-btn{width:100%;padding:13px;border-radius:var(--r);cursor:pointer;user-select:none;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1px;border:2px solid #FDE68A;background:var(--gold-bg);color:var(--gold);text-align:center;transition:all .15s;margin-top:10px;}
+.draw-btn.selected{background:var(--gold);color:#fff;border-color:var(--gold);}
+.draw-btn:active{transform:scale(0.98);}
+.vote-confirm-btn{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(5,150,105,0.3);display:none;margin-top:10px;}
+.vote-confirm-btn.visible{display:block;}
+.vote-confirm-btn:active{transform:scale(0.98);opacity:0.9;}
+.vote-confirm-btn:disabled{opacity:0.45;cursor:not-allowed;}
+
+/* Overtime */
+.overtime-banner{background:var(--gold-bg);border:2px solid #FDE68A;border-radius:var(--r);padding:11px 14px;text-align:center;}
+.ot-title{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--orange);margin-bottom:2px;}
+.ot-sub{font-size:11px;color:var(--gold);}
+
+/* Submitted */
+#s-submitted{background:var(--bg);}
+.sub-card{background:var(--white);border:1px solid #A7F3D0;border-radius:var(--r2);padding:32px 24px;width:min(380px,92vw);text-align:center;box-shadow:var(--sh2);}
+.sub-icon{font-size:44px;margin-bottom:10px;}
+.sub-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--green);margin-bottom:6px;}
+.sub-info{font-size:13px;color:var(--t2);margin-bottom:14px;line-height:1.6;}
+.sub-choice{background:var(--green-bg);border:1.5px solid #A7F3D0;border-radius:var(--r);padding:12px;font-size:15px;margin-bottom:14px;line-height:1.8;}
+.sub-note{font-size:11px;color:var(--t3);}
+
+/* Error */
+#s-error{background:var(--bg);}
+.err-card{background:var(--white);border:1px solid var(--red-mid);border-radius:var(--r2);padding:32px 24px;width:min(380px,92vw);text-align:center;box-shadow:var(--sh2);}
+.err-icon{font-size:44px;margin-bottom:10px;}
+.err-title2{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--red);margin-bottom:8px;}
+.err-sub{font-size:13px;color:var(--t2);margin-bottom:20px;line-height:1.6;}
+
+/* Toast */
+.toast-wrap{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:8px;z-index:9999;pointer-events:none;width:min(340px,88vw);}
+.toast{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--r);font-size:13px;font-weight:500;box-shadow:var(--sh2);opacity:1;transition:opacity .3s;}
+.toast.ok{background:var(--green-bg);border:1px solid #A7F3D0;color:var(--green);}
+.toast.err{background:var(--red-bg);border:1px solid var(--red-mid);color:var(--red);}
+.toast.inf{background:#EFF6FF;border:1px solid var(--blue-mid);color:var(--blue);}
+
+/* Lang */
+.lang-row{display:flex;justify-content:flex-end;gap:6px;margin-bottom:14px;}
+.lang-btn{padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--t2);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s;}
+.lang-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+</style>
+</head>
+<body>
+
+<!-- CONNECT -->
+<div class="screen active" id="s-connect">
+  <div class="connect-card">
+    <div class="lang-row">
+      <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="logo">JJ<span>Contact</span></div>
+    <div class="logo-sub" data-i18n="connect_sub">Scorecard officielle — Juge</div>
+    <div class="sep"></div>
+    <label class="fl" data-i18n="connect_code">Code tapis</label>
+    <input class="fi" id="inp-code" placeholder="ex: TAPIS 1" autocomplete="off" autocorrect="off" spellcheck="false" style="text-transform:uppercase;letter-spacing:1px;">
+    <label class="fl" data-i18n="connect_judge">Votre identifiant</label>
+    <input class="fi" id="inp-judge" placeholder="ex: Juge 1" autocomplete="off" autocorrect="off" spellcheck="false">
+    <button class="btn-primary" id="btn-join" onclick="doJoin()" data-i18n="connect_btn">Rejoindre le tapis</button>
+    <div class="err-msg" id="connect-err"></div>
+    <div class="connect-hint" data-i18n="connect_hint">Code communiqué par le responsable de table</div>
+  </div>
+</div>
+
+<!-- WAITING -->
+<div class="screen" id="s-waiting">
+  <div class="wait-card">
+    <div class="conn-badge"><div class="conn-dot"></div><span data-i18n="wait_conn">Connecté</span></div>
+    <div class="wait-icon">⏳</div>
+    <div class="wait-title" data-i18n="wait_title">En attente du combat</div>
+    <div class="wait-sub" data-i18n="wait_sub">Le vote s'ouvrira automatiquement dès que le responsable lancera le combat.</div>
+    <div class="wait-fighters" id="wait-fighters" style="display:none;">
+      <div class="wf-name red" id="wait-red">—</div>
+      <div class="wf-vs">VS</div>
+      <div class="wf-name blue" id="wait-blue">—</div>
+    </div>
+  </div>
+</div>
+
+<!-- VOTE -->
+<div class="screen" id="s-vote">
+  <div class="vote-wrap">
+
+    <div class="vote-topbar">
+      <div class="vote-judge-tag" id="v-judge-tag">Juge</div>
+      <div class="vote-fmt-tag" id="v-fmt-tag">TOURNOI</div>
+    </div>
+
+    <div class="overtime-banner" id="ot-banner" style="display:none;">
+      <div class="ot-title" id="ot-title">⏱ Prolongation</div>
+      <div class="ot-sub" id="ot-sub">Décision obligatoire — match nul non autorisé</div>
+    </div>
+
+    <div class="vote-fighters">
+      <div class="vote-fighters-hdr" data-i18n="vote_fight">Combat en cours</div>
+      <div class="vote-fighters-names">
+        <div class="vfname red" id="v-red-name">—</div>
+        <div class="vfvs">VS</div>
+        <div class="vfname blue" id="v-blue-name">—</div>
+      </div>
+    </div>
+
+    <div class="step-nav">
+      <div class="step-nav-left">
+        <button class="step-back-btn" id="vote-nav-back" onclick="voteNavBack()" style="display:none;">← <span data-i18n="btn_back">Retour</span></button>
+        <div class="step-title" id="vote-nav-title"></div>
+      </div>
+      <div class="step-dots">
+        <div class="step-dot active" id="nd0"></div>
+        <div class="step-dot" id="nd1"></div>
+        <div class="step-dot" id="nd2"></div>
+      </div>
+    </div>
+
+    <!-- STEP 0 : Méthode -->
+    <div class="step active" id="step-0">
+      <div class="method-grid">
+        <div class="method-btn" id="m-tko" onclick="selectMethod('TKO')">
+          <div class="method-btn-icon">✊</div>
+          <div>TKO / KO</div>
+          <div class="method-btn-sub" data-i18n="method_tko_sub">Arrêt technique</div>
+        </div>
+        <div class="method-btn" id="m-sub" onclick="selectMethod('Soumission')">
+          <div class="method-btn-icon">🔒</div>
+          <div data-i18n="method_sub">Soumission</div>
+          <div class="method-btn-sub" data-i18n="method_sub_sub">Clé / Étranglement</div>
+        </div>
+        <div class="method-btn method-full" id="m-dec" onclick="selectMethod('Décision')">
+          <div class="method-btn-icon">📋</div>
+          <div data-i18n="method_dec">Décision des juges</div>
+          <div class="method-btn-sub" data-i18n="method_dec_sub">Notation 10-9 / 10-8 / 10-7</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 1a : Scoring décision -->
+    <div class="step" id="step-1-dec">
+      <div id="v-rtabs-wrap" style="display:none;">
+        <div class="rtabs">
+          <div class="rtab active" id="rtab-0" onclick="switchRound(0)">R1</div>
+          <div class="rtab" id="rtab-1" onclick="switchRound(1)">R2</div>
+          <div class="rtab" id="rtab-2" onclick="switchRound(2)">R3</div>
+        </div>
+      </div>
+      <div class="score-section" id="score-section">
+        <div class="score-section-hdr">
+          <div class="score-section-title" data-i18n="scoring_title">Notation du round</div>
+          <div class="score-round-badge" id="v-round-badge">Round 1</div>
+        </div>
+        <div class="score-grid">
+          <div class="score-col red-col">
+            <div class="score-col-hdr" id="sc-red-name">ROUGE</div>
+            <div class="srow"><div class="score-pills" id="pills-red">
+              <div class="spill" onclick="setScore('red',10)">10</div>
+              <div class="spill" onclick="setScore('red',9)">9</div>
+              <div class="spill" onclick="setScore('red',8)">8</div>
+              <div class="spill" onclick="setScore('red',7)">7</div>
+            </div></div>
+            <div class="srow"><div class="pen-counter">
+              <div class="pen-btn" onclick="chgPen('red',-1)">−</div>
+              <div class="pen-val" id="pen-r">0</div>
+              <div class="pen-btn" onclick="chgPen('red',+1)">+</div>
+            </div></div>
+          </div>
+          <div class="score-labels">
+            <div class="score-row-label" data-i18n="lbl_score">Score</div>
+            <div class="score-row-label" data-i18n="lbl_pen">Pén.</div>
+          </div>
+          <div class="score-col blue-col">
+            <div class="score-col-hdr" id="sc-blue-name">BLEU</div>
+            <div class="srow"><div class="score-pills" id="pills-blue">
+              <div class="spill" onclick="setScore('blue',10)">10</div>
+              <div class="spill" onclick="setScore('blue',9)">9</div>
+              <div class="spill" onclick="setScore('blue',8)">8</div>
+              <div class="spill" onclick="setScore('blue',7)">7</div>
+            </div></div>
+            <div class="srow"><div class="pen-counter">
+              <div class="pen-btn" onclick="chgPen('blue',-1)">−</div>
+              <div class="pen-val" id="pen-b">0</div>
+              <div class="pen-btn" onclick="chgPen('blue',+1)">+</div>
+            </div></div>
+          </div>
+        </div>
+        <div class="running-score">
+          <div class="rs-box red-rs"><div class="rs-val" id="rs-r">9</div><div class="rs-name" id="rs-rn">ROUGE</div></div>
+          <div class="rs-sep">–</div>
+          <div class="rs-box blue-rs"><div class="rs-val" id="rs-b">9</div><div class="rs-name" id="rs-bn">BLEU</div></div>
+        </div>
+        <div class="rs-note" id="rs-note"></div>
+      </div>
+      <button class="btn-primary" style="margin-top:10px;" onclick="goToWinner()" data-i18n="btn_winner">Désigner le vainqueur →</button>
+    </div>
+
+    <!-- STEP 1b : Quick win TKO/Sub -->
+    <div class="step" id="step-1-quick">
+      <div class="quick-win-card">
+        <div class="method-pill" id="quick-method-label">Victoire par TKO</div>
+        <div class="vote-btns-2">
+          <div class="vote-btn red-btn" id="qw-red" onclick="castVote('red')">
+            <span id="qw-rn">ROUGE</span>
+            <span class="vote-btn-sub" data-i18n="corner_red">Coin rouge</span>
+          </div>
+          <div class="vote-btn blue-btn" id="qw-blue" onclick="castVote('blue')">
+            <span id="qw-bn">BLEU</span>
+            <span class="vote-btn-sub" data-i18n="corner_blue">Coin bleu</span>
+          </div>
+        </div>
+      </div>
+      <button class="vote-confirm-btn" id="v-confirm-btn-quick" onclick="submitVote()" data-i18n="btn_submit">✓ Soumettre ma feuille</button>
+    </div>
+
+    <!-- STEP 2 : Winner décision -->
+    <div class="step" id="step-2">
+      <div class="card-block">
+        <div class="sec-title" data-i18n="step2_title">Résultat selon vous</div>
+        <div class="score-recap" id="score-recap">—</div>
+        <div class="vote-btns-2">
+          <div class="vote-btn red-btn" id="vbtn-red" onclick="castVote('red')">
+            <span id="vbtn-rn">ROUGE</span>
+            <span class="vote-btn-sub" data-i18n="winner_label">Vainqueur selon moi</span>
+          </div>
+          <div class="vote-btn blue-btn" id="vbtn-blue" onclick="castVote('blue')">
+            <span id="vbtn-bn">BLEU</span>
+            <span class="vote-btn-sub" data-i18n="winner_label">Vainqueur selon moi</span>
+          </div>
+        </div>
+        <div id="draw-btn-wrap">
+          <div class="draw-btn" id="vbtn-draw" onclick="castVote('draw')" data-i18n="draw_label">Match nul · 10–10</div>
+        </div>
+      </div>
+      <button class="vote-confirm-btn" id="v-confirm-btn" onclick="submitVote()" data-i18n="btn_submit">✓ Soumettre ma feuille</button>
+    </div>
+
+  </div>
+</div>
+
+<!-- SUBMITTED -->
+<div class="screen" id="s-submitted">
+  <div class="sub-card">
+    <div class="sub-icon">✅</div>
+    <div class="sub-title" data-i18n="submitted_title">Feuille soumise</div>
+    <div class="sub-info" id="sub-info"></div>
+    <div class="sub-choice" id="sub-choice">—</div>
+    <div class="sub-note" data-i18n="submitted_note">Attendez la décision officielle du responsable de table.</div>
+  </div>
+</div>
+
+<!-- ERROR -->
+<div class="screen" id="s-error">
+  <div class="err-card">
+    <div class="err-icon">⚠️</div>
+    <div class="err-title2" id="err-title2">Déconnecté</div>
+    <div class="err-sub" id="err-sub2"></div>
+    <button class="btn-primary" onclick="location.reload()">↺ <span data-i18n="btn_retry">Recommencer</span></button>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<script>
+// ══ CONFIG ══════════════════════════════════════════
+// LOCAL  : ws://localhost:8080
+// PROD   : const WS_URL = 'wss://VOTRE-APP.up.railway.app';
+const WS_URL = 'ws://localhost:8080';
+
+// ══ I18N ═════════════════════════════════════════════
+var LANG=(function(){try{return localStorage.getItem('jjc_lang')||'fr';}catch(e){return 'fr';}})();
+var I18N={
+  fr:{
+    connect_sub:'Scorecard officielle — Juge',connect_code:'Code tapis',connect_judge:'Votre identifiant',
+    connect_btn:'Rejoindre le tapis',connect_hint:'Code communiqué par le responsable de table',
+    wait_conn:'Connecté',wait_title:'En attente du combat',
+    wait_sub:'Le vote s\'ouvrira automatiquement dès que le responsable lancera le combat.',
+    vote_fight:'Combat en cours',
+    method_tko_sub:'Arrêt technique',method_sub:'Soumission',method_sub_sub:'Clé / Étranglement',
+    method_dec:'Décision des juges',method_dec_sub:'Notation 10-9 / 10-8 / 10-7',
+    scoring_title:'Notation du round',lbl_score:'Score',lbl_pen:'Pén.',
+    btn_winner:'Désigner le vainqueur →',btn_back:'Retour',
+    corner_red:'Coin rouge',corner_blue:'Coin bleu',
+    step2_title:'Résultat selon vous',winner_label:'Vainqueur selon moi',draw_label:'Match nul · 10–10',
+    btn_submit:'✓ Soumettre ma feuille',
+    submitted_title:'Feuille soumise',submitted_note:'Attendez la décision officielle du responsable de table.',
+    nav_method:'Mode de victoire',nav_score:'Notation',nav_winner:'Vainqueur',
+    fmt_std:'TOURNOI',fmt_gala:'SUPER FIGHT',
+    ot_title_std:'⏱ Prolongation — 1 min',ot_title_gala:'⏱ Round supplémentaire — 3 min',
+    ot_sub:'Décision obligatoire — match nul non autorisé',
+    btn_retry:'Recommencer',
+    toast_submitted:'Feuille soumise ✓',toast_overtime:'Prolongation — votez à nouveau',
+    err_fill:'Complétez votre feuille',err_no_ws:'Connexion perdue — impossible de soumettre',
+    err_empty:'Renseignez le code tapis et votre identifiant',err_no_server:'Impossible de contacter le serveur',
+    err_disconnected:'Déconnecté'
+  },
+  en:{
+    connect_sub:'Official scorecard — Judge',connect_code:'Mat code',connect_judge:'Your identifier',
+    connect_btn:'Join mat',connect_hint:'Code provided by the table officer',
+    wait_conn:'Connected',wait_title:'Waiting for fight',
+    wait_sub:'Voting will open automatically when the officer starts the fight.',
+    vote_fight:'Fight in progress',
+    method_tko_sub:'Technical stoppage',method_sub:'Submission',method_sub_sub:'Lock / Choke',
+    method_dec:"Judges' decision",method_dec_sub:'Scoring 10-9 / 10-8 / 10-7',
+    scoring_title:'Round scoring',lbl_score:'Score',lbl_pen:'Pen.',
+    btn_winner:'Designate the winner →',btn_back:'Back',
+    corner_red:'Red corner',corner_blue:'Blue corner',
+    step2_title:'Your decision',winner_label:'My pick',draw_label:'Draw · 10–10',
+    btn_submit:'✓ Submit my scorecard',
+    submitted_title:'Scorecard submitted',submitted_note:'Await the official decision from the table officer.',
+    nav_method:'Victory method',nav_score:'Scoring',nav_winner:'Winner',
+    fmt_std:'TOURNAMENT',fmt_gala:'SUPER FIGHT',
+    ot_title_std:'⏱ Overtime — 1 min',ot_title_gala:'⏱ Extra round — 3 min',
+    ot_sub:'Decision required — draw not allowed',
+    btn_retry:'Restart',
+    toast_submitted:'Scorecard submitted ✓',toast_overtime:'Overtime — vote again',
+    err_fill:'Complete your scorecard',err_no_ws:'Connection lost — cannot submit',
+    err_empty:'Enter mat code and your identifier',err_no_server:'Unable to reach the server',
+    err_disconnected:'Disconnected'
+  }
+};
+function t(k){var d=I18N[LANG]||I18N.fr;return d[k]!==undefined?d[k]:(I18N.fr[k]||k);}
+function setLang(l){LANG=l;try{localStorage.setItem('jjc_lang',l);}catch(e){}
+  document.getElementById('btn-fr').classList.toggle('active',l==='fr');
+  document.getElementById('btn-en').classList.toggle('active',l==='en');
+  applyLang();}
+function applyLang(){document.querySelectorAll('[data-i18n]').forEach(function(el){var v=t(el.getAttribute('data-i18n'));if(v)el.textContent=v;});}
+applyLang();
+
+// ══ STATE ════════════════════════════════════════════
+var ws=null;
+var jSt={judgeId:'',code:'',red:'',blue:'',fmt:'std',method:null,vote:null,isOvertime:false};
+var jRounds=[{rs:9,bs:9,rp:0,bp:0}];
+var jRound=0;
+
+// ══ SCREENS ══════════════════════════════════════════
+function showScr(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');}
+
+// ══ WEBSOCKET ════════════════════════════════════════
+function doJoin(){
+  var code=document.getElementById('inp-code').value.trim().toUpperCase();
+  var judge=document.getElementById('inp-judge').value.trim();
+  if(!code||!judge){document.getElementById('connect-err').textContent=t('err_empty');return;}
+  jSt.code=code; jSt.judgeId=judge;
+  document.getElementById('btn-join').disabled=true;
+  document.getElementById('connect-err').textContent='';
+  ws=new WebSocket(WS_URL);
+  ws.onopen=function(){ws.send(JSON.stringify({type:'JOIN',code:jSt.code,judgeId:jSt.judgeId}));};
+  ws.onmessage=function(evt){var msg;try{msg=JSON.parse(evt.data);}catch(e){return;}handleMsg(msg);};
+  ws.onclose=function(){handleDisconnect();};
+  ws.onerror=function(){document.getElementById('btn-join').disabled=false;document.getElementById('connect-err').textContent=t('err_no_server');};
+}
+
+function handleMsg(msg){
+  switch(msg.type){
+    case 'JOINED':
+      jSt.red=msg.fighters[0]; jSt.blue=msg.fighters[1]; jSt.fmt=msg.fmt||'std';
+      updateNames();
+      document.getElementById('wait-red').textContent=jSt.red;
+      document.getElementById('wait-blue').textContent=jSt.blue;
+      document.getElementById('wait-fighters').style.display='';
+      showScr('s-waiting');
+      break;
+
+    case 'START_VOTING':
+      if(msg.fighters){jSt.red=msg.fighters[0];jSt.blue=msg.fighters[1];}
+      if(msg.fmt) jSt.fmt=msg.fmt;
+      jSt.isOvertime=false;
+      initVote();
+      showScr('s-vote');
+      break;
+
+    case 'OVERTIME':
+      jSt.isOvertime=true;
+      initVote();
+      var ot=document.getElementById('ot-banner'); ot.style.display='';
+      document.getElementById('ot-title').textContent=t(jSt.fmt==='gala'?'ot_title_gala':'ot_title_std');
+      document.getElementById('ot-sub').textContent=t('ot_sub');
+      document.getElementById('draw-btn-wrap').style.display='none';
+      showScr('s-vote');
+      toast(t('toast_overtime'),'inf');
+      break;
+
+    case 'VOTE_CONFIRMED':
+      buildSubmitted(); showScr('s-submitted'); break;
+
+    case 'ERROR':
+      if(document.querySelector('.screen.active').id==='s-connect'){
+        document.getElementById('btn-join').disabled=false;
+        document.getElementById('connect-err').textContent=msg.message;
+      } else { showErrScr(msg.message); }
+      break;
+  }
+}
+
+function handleDisconnect(){
+  if(document.querySelector('.screen.active').id==='s-submitted') return;
+  showErrScr(t('err_disconnected'));
+}
+function showErrScr(msg){
+  document.getElementById('err-title2').textContent=t('err_disconnected');
+  document.getElementById('err-sub2').textContent=msg;
+  showScr('s-error');
+}
+
+// ══ INIT VOTE ════════════════════════════════════════
+function initVote(){
+  var nR=jSt.fmt==='gala'?3:1;
+  jRounds=Array.from({length:nR},function(){return{rs:9,bs:9,rp:0,bp:0};});
+  jRound=0; jSt.method=null; jSt.vote=null;
+  document.getElementById('v-judge-tag').textContent=jSt.judgeId;
+  document.getElementById('v-fmt-tag').textContent=t(jSt.fmt==='gala'?'fmt_gala':'fmt_std');
+  document.getElementById('ot-banner').style.display='none';
+  document.getElementById('draw-btn-wrap').style.display='';
+  var rw=document.getElementById('v-rtabs-wrap'); rw.style.display=jSt.fmt==='gala'?'':'none';
+  document.getElementById('score-section').style.borderRadius=jSt.fmt==='gala'?'0 0 var(--r2) var(--r2)':'var(--r2)';
+  updateNames();
+  goStep(0);
+  ['m-tko','m-sub','m-dec'].forEach(function(id){document.getElementById(id).classList.remove('sel');});
+  ['vbtn-red','vbtn-blue','vbtn-draw','qw-red','qw-blue'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('selected');});
+  ['v-confirm-btn','v-confirm-btn-quick'].forEach(function(id){var e=document.getElementById(id);if(e){e.classList.remove('visible');e.disabled=false;}});
+  renderRTabs(); renderScoring();
+}
+
+function updateNames(){
+  ['v-red-name','qw-rn','vbtn-rn','sc-red-name','rs-rn'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=jSt.red;});
+  ['v-blue-name','qw-bn','vbtn-bn','sc-blue-name','rs-bn'].forEach(function(id){var e=document.getElementById(id);if(e)e.textContent=jSt.blue;});
+}
+
+// ══ STEP NAV ══════════════════════════════════════════
+var STEPS={0:'nav_method',1:'nav_score',2:'nav_winner'};
+function goStep(n){
+  ['step-0','step-1-dec','step-1-quick','step-2'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('active');});
+  if(n===0) document.getElementById('step-0').classList.add('active');
+  var nt=document.getElementById('vote-nav-title'); if(nt) nt.textContent=t(STEPS[n]||'nav_method');
+  var nb=document.getElementById('vote-nav-back'); if(nb) nb.style.display=n!==0?'flex':'none';
+  var dots=[document.getElementById('nd0'),document.getElementById('nd1'),document.getElementById('nd2')];
+  var ds=n>=2?2:n>=1?1:0;
+  dots.forEach(function(d,i){if(!d)return;d.classList.remove('active','done');if(i<ds)d.classList.add('done');else if(i===ds)d.classList.add('active');});
+}
+function voteNavBack(){
+  var act=function(id){return document.getElementById(id)&&document.getElementById(id).classList.contains('active');};
+  if(act('step-2')){
+    goStep(1); document.getElementById('step-1-dec').classList.add('active');
+    document.getElementById('v-confirm-btn').classList.remove('visible');
+    jSt.vote=null;
+    ['vbtn-red','vbtn-blue','vbtn-draw'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('selected');});
+  } else if(act('step-1-dec')||act('step-1-quick')){
+    goStep(0);
+    ['v-confirm-btn','v-confirm-btn-quick'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('visible');});
+    jSt.vote=null; jSt.method=null;
+    ['m-tko','m-sub','m-dec'].forEach(function(id){document.getElementById(id).classList.remove('sel');});
+  }
+}
+
+// ══ METHOD ════════════════════════════════════════════
+function selectMethod(method){
+  jSt.method=method;
+  ['m-tko','m-sub','m-dec'].forEach(function(id){document.getElementById(id).classList.remove('sel');});
+  document.getElementById(method==='TKO'?'m-tko':method==='Soumission'?'m-sub':'m-dec').classList.add('sel');
+  goStep(1);
+  if(method==='Décision'){
+    document.getElementById('step-1-dec').classList.add('active');
+    renderRTabs(); renderScoring();
+  } else {
+    document.getElementById('step-1-quick').classList.add('active');
+    document.getElementById('quick-method-label').textContent=(LANG==='fr'?'Victoire par ':'Win by ')+method;
+    var nd2=document.getElementById('nd2'); if(nd2) nd2.style.opacity='0.2';
+  }
+}
+
+// ══ SCORING ══════════════════════════════════════════
+function switchRound(idx){jRound=idx;renderRTabs();renderScoring();}
+function renderRTabs(){
+  if(jSt.fmt!=='gala') return;
+  for(var i=0;i<3;i++){
+    var tab=document.getElementById('rtab-'+i); if(!tab) continue;
+    tab.classList.toggle('active',i===jRound);
+    var r=jRounds[i]; var scored=r&&(r.rs!==9||r.bs!==9||r.rp>0||r.bp>0);
+    tab.classList.toggle('scored',scored&&i!==jRound);
+    tab.textContent='R'+(i+1)+(scored&&i!==jRound?' ✓':'');
+  }
+  var b=document.getElementById('v-round-badge'); if(b) b.textContent='Round '+(jRound+1);
+}
+function renderScoring(){
+  var r=jRounds[jRound]; if(!r) return;
+  document.querySelectorAll('#pills-red .spill').forEach(function(p){p.classList.toggle('sel',parseInt(p.textContent)===r.rs);});
+  document.querySelectorAll('#pills-blue .spill').forEach(function(p){p.classList.toggle('sel',parseInt(p.textContent)===r.bs);});
+  var pr=document.getElementById('pen-r'); if(pr) pr.textContent=r.rp;
+  var pb=document.getElementById('pen-b'); if(pb) pb.textContent=r.bp;
+  updRunning();
+}
+function setScore(side,val){var r=jRounds[jRound];if(!r)return;if(side==='red')r.rs=val;else r.bs=val;renderScoring();}
+function chgPen(side,d){var r=jRounds[jRound];if(!r)return;if(side==='red')r.rp=Math.max(0,r.rp+d);else r.bp=Math.max(0,r.bp+d);renderScoring();}
+function updRunning(){
+  var er=document.getElementById('rs-r'),eb=document.getElementById('rs-b'),note=document.getElementById('rs-note');
+  if(jSt.fmt==='gala'){
+    var cumR=0,cumB=0;
+    for(var i=0;i<=jRound;i++){cumR+=jRounds[i].rs-jRounds[i].rp;cumB+=jRounds[i].bs-jRounds[i].bp;}
+    if(er)er.textContent=cumR; if(eb)eb.textContent=cumB;
+    if(note){var rs=(jRounds[jRound].rs-jRounds[jRound].rp)+'–'+(jRounds[jRound].bs-jRounds[jRound].bp);note.textContent='R'+(jRound+1)+' : '+rs+' · '+(LANG==='fr'?'Cumulé après R':'Cumul after R')+(jRound+1);}
+  } else {
+    var r=jRounds[0];
+    if(er)er.textContent=r.rs-r.rp; if(eb)eb.textContent=r.bs-r.bp;
+    if(note)note.textContent=LANG==='fr'?'Score après pénalités':'Score after penalties';
+  }
+}
+function goToWinner(){
+  var tR=jRounds.reduce(function(s,r){return s+r.rs-r.rp;},0);
+  var tB=jRounds.reduce(function(s,r){return s+r.bs-r.bp;},0);
+  var lines;
+  if(jRounds.length>1){
+    lines=jRounds.map(function(r,i){return '<span style="color:var(--t2);font-size:13px">R'+(i+1)+'</span> <span style="color:var(--red)">'+(r.rs-r.rp)+'</span><span style="color:var(--t3)"> – </span><span style="color:var(--blue)">'+(r.bs-r.bp)+'</span>';}).join('<br>');
+    lines+='<br><span style="font-size:14px;color:var(--t2)">Total '+tR+' – '+tB+'</span>';
+  } else {
+    lines='<span style="color:var(--red)">'+tR+'</span><span style="color:var(--t3)"> – </span><span style="color:var(--blue)">'+tB+'</span>';
+  }
+  var sr=document.getElementById('score-recap'); if(sr) sr.innerHTML=lines;
+  document.getElementById('nd2').style.opacity='1';
+  goStep(2); document.getElementById('step-2').classList.add('active');
+  jSt.vote=null;
+  ['vbtn-red','vbtn-blue','vbtn-draw'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('selected');});
+  document.getElementById('v-confirm-btn').classList.remove('visible');
+}
+
+// ══ CAST & SUBMIT ═════════════════════════════════════
+function castVote(side){
+  jSt.vote=side;
+  ['vbtn-red','vbtn-blue','vbtn-draw','qw-red','qw-blue'].forEach(function(id){var e=document.getElementById(id);if(e)e.classList.remove('selected');});
+  if(jSt.method==='Décision'){
+    var el=document.getElementById('vbtn-'+side); if(el) el.classList.add('selected');
+    document.getElementById('v-confirm-btn').classList.add('visible');
+  } else {
+    var el2=document.getElementById('qw-'+side); if(el2) el2.classList.add('selected');
+    document.getElementById('v-confirm-btn-quick').classList.add('visible');
+  }
+}
+function submitVote(){
+  if(!jSt.vote||!jSt.method){toast(t('err_fill'),'err');return;}
+  if(!ws||ws.readyState!==WebSocket.OPEN){showErrScr(t('err_no_ws'));return;}
+  var tR=jRounds.reduce(function(s,r){return s+r.rs-r.rp;},0);
+  var tB=jRounds.reduce(function(s,r){return s+r.bs-r.bp;},0);
+  var vote={
+    method:jSt.method, winner:jSt.vote, isOvertime:jSt.isOvertime,
+    rounds:jSt.method==='Décision'?jRounds.map(function(r){return{rs:r.rs,bs:r.bs,rp:r.rp,bp:r.bp};}):[],
+    totalRed:jSt.method==='Décision'?tR:null,
+    totalBlue:jSt.method==='Décision'?tB:null
+  };
+  ws.send(JSON.stringify({type:'SUBMIT_VOTE',code:jSt.code,judgeId:jSt.judgeId,vote:vote}));
+  ['v-confirm-btn','v-confirm-btn-quick'].forEach(function(id){var e=document.getElementById(id);if(e)e.disabled=true;});
+}
+function buildSubmitted(){
+  var wName=jSt.vote==='red'?jSt.red:jSt.vote==='blue'?jSt.blue:(LANG==='fr'?'Match nul':'Draw');
+  var col=jSt.vote==='red'?'var(--red)':jSt.vote==='blue'?'var(--blue)':'var(--gold)';
+  var tR=jRounds.reduce(function(s,r){return s+r.rs-r.rp;},0);
+  var tB=jRounds.reduce(function(s,r){return s+r.bs-r.bp;},0);
+  var sc='';
+  if(jSt.method==='Décision'){
+    sc=jRounds.length>1?jRounds.map(function(r,i){return 'R'+(i+1)+': '+(r.rs-r.rp)+'–'+(r.bs-r.bp);}).join(' · ')+' | Total: '+tR+'–'+tB:tR+' – '+tB;
+  }
+  document.getElementById('sub-info').innerHTML=jSt.judgeId+'<br><span style="font-size:11px;color:var(--t3)">'+(jSt.fmt==='std'?t('fmt_std')+' · 1×3min':t('fmt_gala')+' · 3×3min')+'</span>';
+  document.getElementById('sub-choice').innerHTML='🏆 <span style="color:'+col+';font-weight:900">'+wName+'</span><br>'+'<span style="font-size:14px;color:var(--navy);font-weight:700">'+jSt.method+'</span>'+(sc?'<br><span style="font-size:12px;color:var(--t2)">'+sc+'</span>':'');
+  toast(t('toast_submitted'),'ok');
+}
+
+// ══ TOAST ════════════════════════════════════════════
+function toast(msg,type){
+  type=type||'inf';
+  var w=document.getElementById('toast-wrap');
+  var el=document.createElement('div'); el.className='toast '+type;
+  el.innerHTML='<span>'+({ok:'✅',err:'❌',inf:'ℹ️'}[type]||'ℹ️')+'</span><span>'+msg+'</span>';
+  w.appendChild(el);
+  setTimeout(function(){el.style.opacity='0';setTimeout(function(){el.remove();},300);},3000);
+}
+
+// ══ QR CODE param ═════════════════════════════════════
+(function(){var p=new URLSearchParams(location.search);var c=p.get('code');if(c)document.getElementById('inp-code').value=c.toUpperCase();})();
+</script>
+</body>
+</html>

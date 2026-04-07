@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JJContact — Responsable de Table</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@300;400;500;600&display=swap');
+:root {
+  --red:#C8102E; --red-bg:#FEF2F2; --red-mid:#FECACA;
+  --blue:#1D4ED8; --blue-bg:#EFF6FF; --blue-mid:#BFDBFE;
+  --navy:#0C1F5E;
+  --bg:#F5F0E8; --white:#FDFAF5;
+  --border:#E2E8F0; --b2:#CBD5E1;
+  --text:#0F172A; --t2:#475569; --t3:#94A3B8;
+  --green:#059669; --green-bg:#ECFDF5;
+  --orange:#D97706; --gold:#B45309; --gold-bg:#FFFBEB;
+  --r:12px; --r2:16px;
+  --sh:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --sh2:0 4px 16px rgba(0,0,0,0.10),0 2px 4px rgba(0,0,0,0.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body{min-height:100%;background:var(--bg);color:var(--text);font-family:'Barlow',sans-serif;touch-action:manipulation;}
+.screen{display:none;width:100%;min-height:100vh;min-height:100dvh;flex-direction:column;align-items:center;justify-content:center;}
+.screen.active{display:flex;}
+#s-table{justify-content:flex-start;align-items:stretch;}
+
+/* ─── SETUP ─────────────────────────────────── */
+#s-setup{background:var(--bg);}
+.setup-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:28px 24px;width:min(440px,94vw);box-shadow:var(--sh2);max-height:90vh;overflow-y:auto;}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:var(--navy);text-align:center;margin-bottom:2px;}
+.logo span{color:var(--red);}
+.logo-sub{font-size:10px;color:var(--t3);letter-spacing:3px;text-transform:uppercase;text-align:center;margin-bottom:18px;}
+.sep{height:1px;background:var(--border);margin:0 0 18px;}
+.lang-row{display:flex;justify-content:flex-end;gap:6px;margin-bottom:14px;}
+.lang-btn{padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);background:var(--bg);color:var(--t2);font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .12s;}
+.lang-btn.active{background:var(--navy);border-color:var(--navy);color:#fff;}
+.fl{display:block;font-size:11px;color:var(--t2);text-transform:uppercase;letter-spacing:1.5px;font-weight:600;margin-bottom:6px;}
+.fi{width:100%;background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'Barlow',sans-serif;font-size:15px;outline:none;transition:border-color .15s;margin-bottom:14px;}
+.fi:focus{border-color:var(--blue);background:var(--white);}
+.fi::placeholder{color:var(--t3);}
+.fi.red-fi{border-color:var(--red-mid);}
+.fi.blue-fi{border-color:var(--blue-mid);}
+.fi-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.btn-primary{width:100%;padding:13px;background:var(--navy);color:#fff;border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:background .15s;box-shadow:0 2px 8px rgba(12,31,94,0.2);}
+.btn-primary:hover{background:#0D2577;}
+.btn-primary:disabled{opacity:0.45;cursor:not-allowed;}
+.btn-ghost{width:100%;padding:10px;background:transparent;color:var(--t2);border:1.5px solid var(--border);border-radius:var(--r);font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;cursor:pointer;margin-top:8px;transition:all .15s;}
+.btn-ghost:hover{border-color:var(--b2);color:var(--text);}
+.err-msg{color:var(--red);font-size:12px;font-weight:600;text-align:center;min-height:16px;margin-top:6px;}
+
+/* Format cards */
+.fmtgrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.fmtcard{background:var(--bg);border:2px solid var(--border);border-radius:10px;padding:12px 10px;text-align:center;cursor:pointer;transition:all .15s;user-select:none;}
+.fmtcard.sel{border-color:var(--navy);background:#EFF3FF;}
+.fmtcard-icon{font-size:22px;margin-bottom:4px;}
+.fmtcard-title{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;text-transform:uppercase;color:var(--navy);}
+.fmtcard-sub{font-size:10px;color:var(--t3);margin-top:2px;line-height:1.4;}
+
+/* ─── TABLE ──────────────────────────────────── */
+#s-table{background:var(--bg);justify-content:flex-start;overflow-y:auto;align-items:stretch;}
+.table-inner{width:min(600px,96vw);margin:0 auto;padding:14px 0 40px;}
+
+/* Header */
+.table-hdr{background:var(--navy);border-radius:var(--r2);padding:12px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;box-shadow:var(--sh2);}
+.table-hdr-left{}
+.table-hdr-title{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:900;text-transform:uppercase;letter-spacing:2px;color:#fff;}
+.table-hdr-sub{font-size:10px;color:rgba(255,255,255,0.45);margin-top:1px;}
+.table-hdr-right{display:flex;align-items:center;gap:8px;}
+.hdr-code{font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;color:rgba(255,255,255,0.6);background:rgba(255,255,255,0.1);padding:3px 10px;border-radius:6px;letter-spacing:1px;}
+.hdr-fmt{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);text-transform:uppercase;letter-spacing:1px;}
+
+/* Cards */
+.tcard{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:14px 16px;margin-bottom:10px;box-shadow:var(--sh);}
+.tcard-sep{height:1px;background:var(--border);margin:12px 0;}
+.sec-title{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--t2);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* Fighters display */
+.fdgrid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;}
+.fdbox{border-radius:var(--r);padding:10px;text-align:center;}
+.fdbox.red-fd{background:var(--red-bg);border:1.5px solid var(--red-mid);}
+.fdbox.blue-fd{background:var(--blue-bg);border:1.5px solid var(--blue-mid);}
+.fd-corner{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;margin-bottom:3px;}
+.fdbox.red-fd .fd-corner{color:var(--red);}
+.fdbox.blue-fd .fd-corner{color:var(--blue);}
+.fd-name{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;}
+.fdbox.red-fd .fd-name{color:var(--red);}
+.fdbox.blue-fd .fd-name{color:var(--blue);}
+.fd-vs{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:var(--t3);}
+.fmt-badge{display:inline-block;background:var(--navy);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:6px;margin-top:8px;}
+
+/* Judge status bar */
+.judge-bar{display:flex;gap:6px;margin-bottom:4px;}
+.jbar-slot{flex:1;padding:6px 8px;border-radius:8px;background:var(--bg);border:1.5px solid var(--border);text-align:center;transition:all .3s;}
+.jbar-slot.connected{border-color:#A7F3D0;background:var(--green-bg);}
+.jbar-slot.voted{border-color:var(--blue-mid);background:var(--blue-bg);}
+.jbar-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--t3);margin-bottom:2px;}
+.jbar-slot.connected .jbar-label{color:var(--green);}
+.jbar-slot.voted .jbar-label{color:var(--blue);}
+.jbar-status{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;color:var(--t3);}
+.jbar-slot.connected .jbar-status{color:var(--green);}
+.jbar-slot.voted .jbar-status{color:var(--blue);}
+
+/* Vote slots */
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.vslot{border-radius:var(--r);padding:12px 8px;text-align:center;border:1.5px solid var(--border);background:var(--bg);transition:all .3s;}
+.vslot.voted-red{background:var(--red-bg);border-color:var(--red-mid);}
+.vslot.voted-blue{background:var(--blue-bg);border-color:var(--blue-mid);}
+.vslot.voted-draw{background:var(--gold-bg);border-color:#FDE68A;}
+.vslot-icon{font-size:18px;min-height:24px;margin-bottom:3px;}
+.vslot-judge{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;font-weight:600;margin-bottom:3px;}
+.vslot-result{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;line-height:1.1;}
+.vslot.pending .vslot-result{color:var(--t3);font-size:11px;font-weight:400;font-family:'Barlow',sans-serif;}
+.vslot.voted-red  .vslot-result{color:var(--red);}
+.vslot.voted-blue .vslot-result{color:var(--blue);}
+.vslot.voted-draw .vslot-result{color:var(--gold);}
+.vslot-method{font-size:10px;color:var(--t2);margin-top:2px;}
+.vslot-scores{font-size:9px;color:var(--t3);margin-top:2px;line-height:1.4;}
+
+/* Manual entry */
+.mvgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.mvgroup{display:flex;flex-direction:column;gap:5px;}
+.mv-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:1px;font-weight:600;text-align:center;}
+.mv-btns{display:flex;gap:4px;}
+.mv-btn{flex:1;padding:8px 4px;border-radius:7px;cursor:pointer;user-select:none;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;text-transform:uppercase;border:1.5px solid transparent;transition:all .15s;text-align:center;}
+.mv-btn.red-mv{background:var(--red-bg);border-color:var(--red-mid);color:var(--red);}
+.mv-btn.blue-mv{background:var(--blue-bg);border-color:var(--blue-mid);color:var(--blue);}
+.mv-btn.draw-mv{background:var(--gold-bg);border-color:#FDE68A;color:var(--gold);}
+.mv-btn.red-mv.sel{background:var(--red);color:#fff;border-color:var(--red);}
+.mv-btn.blue-mv.sel{background:var(--blue);color:#fff;border-color:var(--blue);}
+.mv-btn.draw-mv.sel{background:var(--gold);color:#fff;border-color:var(--gold);}
+
+/* Prolongation card */
+.prolong-card{background:var(--gold-bg);border:2px solid #FDE68A;border-radius:var(--r);padding:14px;text-align:center;margin-bottom:10px;display:none;}
+.prolong-card.visible{display:block;}
+.prolong-title{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;text-transform:uppercase;letter-spacing:1px;color:var(--orange);margin-bottom:2px;}
+.prolong-sub{font-size:12px;color:var(--gold);margin-bottom:10px;}
+.prolong-btns{display:flex;gap:8px;}
+.prolong-btn-cancel{flex:1;padding:9px;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;cursor:pointer;color:var(--t2);}
+.prolong-btn-confirm{flex:1;padding:9px;background:var(--orange);border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;cursor:pointer;color:#fff;letter-spacing:1px;text-transform:uppercase;}
+
+/* Result card */
+.result-card{background:var(--white);border:1px solid var(--border);border-radius:var(--r2);padding:16px;margin-bottom:10px;box-shadow:var(--sh);display:none;}
+.result-card.visible{display:block;}
+.result-winner{border-radius:var(--r);padding:16px 14px;text-align:center;margin-bottom:12px;}
+.result-winner.red-win{background:var(--red-bg);border:2px solid var(--red-mid);}
+.result-winner.blue-win{background:var(--blue-bg);border:2px solid var(--blue-mid);}
+.result-winner.draw{background:var(--gold-bg);border:2px solid #FDE68A;}
+.rw-label{font-size:11px;text-transform:uppercase;letter-spacing:2px;font-weight:700;margin-bottom:5px;}
+.result-winner.red-win .rw-label{color:var(--red);}
+.result-winner.blue-win .rw-label{color:var(--blue);}
+.result-winner.draw .rw-label{color:var(--gold);}
+.rw-name{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;text-transform:uppercase;}
+.result-winner.red-win .rw-name{color:var(--red);}
+.result-winner.blue-win .rw-name{color:var(--blue);}
+.result-winner.draw .rw-name{color:var(--gold);}
+.rw-tally{font-size:12px;color:var(--t2);margin-top:3px;}
+
+/* Decision type pills */
+.dtype-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.dtype-pill{padding:5px 11px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);color:var(--t2);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;user-select:none;}
+.dtype-pill.sel{background:var(--navy);border-color:var(--navy);color:#fff;}
+
+/* Action buttons */
+.action-row{display:flex;gap:8px;}
+.btn-act{flex:1;padding:11px;border-radius:var(--r);border:none;cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;transition:all .15s;}
+.btn-act:active{transform:scale(0.98);}
+.btn-submit-res{background:var(--navy);color:#fff;box-shadow:0 2px 8px rgba(12,31,94,0.2);}
+.btn-submit-res:disabled{background:var(--t3);box-shadow:none;cursor:not-allowed;}
+.btn-reset{background:var(--bg);color:var(--t2);border:1.5px solid var(--border);}
+.btn-reset:hover{border-color:var(--b2);color:var(--text);}
+
+/* ── START VOTING button ── */
+.btn-start-voting{width:100%;padding:14px;background:var(--green);color:#fff;border:none;border-radius:var(--r);font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer;transition:all .15s;box-shadow:0 2px 8px rgba(5,150,105,0.3);margin-bottom:10px;}
+.btn-start-voting:active{transform:scale(0.98);}
+.btn-start-voting:disabled{background:var(--t3);box-shadow:none;cursor:not-allowed;}
+
+/* ─── PROCLAMATION ───────────────────────── */
+#s-proclamation{background:var(--navy);padding:20px;}
+.procl-card{width:min(520px,96vw);text-align:center;}
+.procl-label{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:4px;color:rgba(255,255,255,0.4);margin-bottom:10px;}
+.procl-winner{font-family:'Barlow Condensed',sans-serif;font-size:clamp(38px,10vw,68px);font-weight:900;text-transform:uppercase;letter-spacing:2px;line-height:1;margin-bottom:6px;}
+.procl-winner.red-win{color:#FF4060;}
+.procl-winner.blue-win{color:#60A0FF;}
+.procl-winner.draw-win{color:var(--gold);}
+.procl-corner{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,0.5);margin-bottom:20px;}
+.procl-method{display:inline-block;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:900;text-transform:uppercase;letter-spacing:2px;padding:8px 22px;border-radius:var(--r);margin-bottom:20px;}
+.procl-method.red-win{background:rgba(200,16,46,0.2);color:#FF4060;border:1.5px solid rgba(200,16,46,0.4);}
+.procl-method.blue-win{background:rgba(29,78,216,0.2);color:#60A0FF;border:1.5px solid rgba(29,78,216,0.4);}
+.procl-method.draw-win{background:rgba(234,179,8,0.12);color:var(--gold);border:1.5px solid rgba(234,179,8,0.3);}
+.procl-tally{font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:22px;line-height:1.8;}
+.procl-sep{height:1px;background:rgba(255,255,255,0.1);width:60px;margin:0 auto 22px;}
+.procl-votes{display:flex;justify-content:center;gap:10px;margin-bottom:28px;}
+.procl-vote-slot{width:76px;padding:10px 6px;border-radius:var(--r);text-align:center;border:1px solid rgba(255,255,255,0.1);}
+.procl-vote-slot.pv-red{background:rgba(200,16,46,0.18);}
+.procl-vote-slot.pv-blue{background:rgba(29,78,216,0.18);}
+.procl-vote-slot.pv-draw{background:rgba(234,179,8,0.1);}
+.procl-vote-icon{font-size:20px;margin-bottom:3px;}
+.procl-vote-judge{font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1px;}
+.procl-btn-row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+.procl-btn{padding:11px 22px;border-radius:var(--r);cursor:pointer;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;border:none;transition:all .15s;}
+.procl-btn-new{background:rgba(255,255,255,0.1);color:rgba(255,255,255,0.7);}
+.procl-btn-new:hover{background:rgba(255,255,255,0.18);color:#fff;}
+.procl-btn-back{background:transparent;color:rgba(255,255,255,0.4);border:1px solid rgba(255,255,255,0.15);}
+.procl-btn-back:hover{background:rgba(255,255,255,0.08);}
+
+/* ─── TOAST ─────────────────────────────────── */
+.toast-wrap{position:fixed;bottom:14px;right:14px;z-index:999;display:flex;flex-direction:column;gap:5px;pointer-events:none;}
+.toast{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:9px 14px;font-size:13px;display:flex;align-items:center;gap:7px;animation:tin .2s ease;box-shadow:var(--sh2);color:var(--text);}
+.toast.ok{border-left:3px solid var(--green);}
+.toast.err{border-left:3px solid var(--red);}
+.toast.inf{border-left:3px solid var(--blue);}
+@keyframes tin{from{transform:translateX(14px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* connection badge */
+.conn-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--green);background:var(--green-bg);border:1px solid #A7F3D0;border-radius:20px;padding:3px 10px;margin-bottom:4px;}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     SETUP — Créer le combat
+════════════════════════════════════ -->
+<div class="screen active" id="s-setup">
+  <div class="setup-card">
+    <div class="lang-row">
+      <button class="lang-btn active" id="btn-fr" onclick="setLang('fr')">FR</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+    </div>
+    <div class="logo">JJ<span>Contact</span></div>
+    <div class="logo-sub" data-i18n="setup_sub">Responsable de Table</div>
+    <div class="sep"></div>
+
+    <label class="fl" data-i18n="lbl_code">Code tapis</label>
+    <input class="fi" id="inp-code" placeholder="ex: TAPIS 1" autocomplete="off" autocorrect="off" spellcheck="false" style="text-transform:uppercase;letter-spacing:1px;">
+
+    <label class="fl" data-i18n="lbl_format">Format du combat</label>
+    <div class="fmtgrid">
+      <div class="fmtcard sel" id="fmt-std" onclick="selFmt('std')">
+        <div class="fmtcard-icon">⏱</div>
+        <div class="fmtcard-title" data-i18n="fmt_std_title">Tournoi</div>
+        <div class="fmtcard-sub" data-i18n="fmt_std_sub">1×3 min · +1 min si égalité</div>
+      </div>
+      <div class="fmtcard" id="fmt-gala" onclick="selFmt('gala')">
+        <div class="fmtcard-icon">🎖</div>
+        <div class="fmtcard-title" data-i18n="fmt_gala_title">Super Fight</div>
+        <div class="fmtcard-sub" data-i18n="fmt_gala_sub">3×3 min · +1 round si égalité</div>
+      </div>
+    </div>
+
+    <label class="fl" data-i18n="lbl_fighters">Combattants</label>
+    <div class="fi-row">
+      <div>
+        <label class="fl" style="color:var(--red)" data-i18n="lbl_red">Coin Rouge</label>
+        <input class="fi red-fi" id="inp-red" placeholder="Nom" autocomplete="off">
+      </div>
+      <div>
+        <label class="fl" style="color:var(--blue)" data-i18n="lbl_blue">Coin Bleu</label>
+        <input class="fi blue-fi" id="inp-blue" placeholder="Nom" autocomplete="off">
+      </div>
+    </div>
+
+    <button class="btn-primary" id="btn-create" onclick="createFight()" data-i18n="btn_create">Créer le combat</button>
+    <div class="err-msg" id="setup-err"></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════
+     TABLE — Vue principale
+════════════════════════════════════ -->
+<div class="screen" id="s-table">
+  <div class="table-inner">
+
+    <!-- Header -->
+    <div class="table-hdr">
+      <div class="table-hdr-left">
+        <div class="table-hdr-title" data-i18n="table_title">Table Officielle</div>
+        <div class="table-hdr-sub" id="table-hdr-sub">Tapis — · Format —</div>
+      </div>
+      <div class="table-hdr-right">
+        <div class="hdr-code" id="hdr-code">—</div>
+        <button onclick="resetToSetup()" style="font-size:10px;color:rgba(255,255,255,0.35);background:transparent;border:none;cursor:pointer;padding:4px 6px;" data-i18n="btn_new">↺ Nouveau</button>
+      </div>
+    </div>
+
+    <!-- Fighters -->
+    <div class="tcard">
+      <div class="fdgrid">
+        <div class="fdbox red-fd">
+          <div class="fd-corner" data-i18n="corner_red">Coin Rouge</div>
+          <div class="fd-name" id="t-red-name">—</div>
+        </div>
+        <div class="fd-vs">VS</div>
+        <div class="fdbox blue-fd">
+          <div class="fd-corner" data-i18n="corner_blue">Coin Bleu</div>
+          <div class="fd-name" id="t-blue-name">—</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:8px;">
+        <span class="fmt-badge" id="t-fmt-badge">TOURNOI</span>
+      </div>
+    </div>
+
+    <!-- Juges connectés -->
+    <div class="tcard">
+      <div class="sec-title" data-i18n="sec_judges">Juges connectés</div>
+      <div class="judge-bar" id="judge-bar">
+        <div class="jbar-slot" id="jbar-1"><div class="jbar-label" data-i18n="jbar_waiting">En attente</div><div class="jbar-status">—</div></div>
+        <div class="jbar-slot" id="jbar-2"><div class="jbar-label" data-i18n="jbar_waiting">En attente</div><div class="jbar-status">—</div></div>
+        <div class="jbar-slot" id="jbar-3"><div class="jbar-label" data-i18n="jbar_waiting">En attente</div><div class="jbar-status">—</div></div>
+      </div>
+    </div>
+
+    <!-- Bouton lancer le vote -->
+    <button class="btn-start-voting" id="btn-start-voting" onclick="startVoting()" data-i18n="btn_start_voting">
+      ▶ Ouvrir le vote
+    </button>
+
+    <!-- Votes des juges -->
+    <div class="tcard">
+      <div class="sec-title" data-i18n="sec_votes">Votes des 3 juges</div>
+      <div class="vgrid">
+        <div class="vslot pending" id="vs-1">
+          <div class="vslot-icon" id="vsi-1">⏳</div>
+          <div class="vslot-judge" id="vsj-1">Juge 1</div>
+          <div class="vslot-result" id="vsr-1" data-i18n="pending">En attente</div>
+          <div class="vslot-method" id="vsm-1"></div>
+          <div class="vslot-scores" id="vss-1"></div>
+        </div>
+        <div class="vslot pending" id="vs-2">
+          <div class="vslot-icon" id="vsi-2">⏳</div>
+          <div class="vslot-judge" id="vsj-2">Juge 2</div>
+          <div class="vslot-result" id="vsr-2" data-i18n="pending">En attente</div>
+          <div class="vslot-method" id="vsm-2"></div>
+          <div class="vslot-scores" id="vss-2"></div>
+        </div>
+        <div class="vslot pending" id="vs-3">
+          <div class="vslot-icon" id="vsi-3">⏳</div>
+          <div class="vslot-judge" id="vsj-3">Juge 3</div>
+          <div class="vslot-result" id="vsr-3" data-i18n="pending">En attente</div>
+          <div class="vslot-method" id="vsm-3"></div>
+          <div class="vslot-scores" id="vss-3"></div>
+        </div>
+      </div>
+
+      <div class="tcard-sep"></div>
+
+      <!-- Saisie manuelle (fallback) -->
+      <div class="sec-title" data-i18n="sec_manual">Saisie manuelle</div>
+      <div class="mvgrid">
+        <div class="mvgroup">
+          <div class="mv-label">Juge 1</div>
+          <div class="mv-btns">
+            <div class="mv-btn red-mv"  id="mv-1-r" onclick="setVote(1,'red')">R</div>
+            <div class="mv-btn draw-mv" id="mv-1-d" onclick="setVote(1,'draw')">N</div>
+            <div class="mv-btn blue-mv" id="mv-1-b" onclick="setVote(1,'blue')">B</div>
+          </div>
+        </div>
+        <div class="mvgroup">
+          <div class="mv-label">Juge 2</div>
+          <div class="mv-btns">
+            <div class="mv-btn red-mv"  id="mv-2-r" onclick="setVote(2,'red')">R</div>
+            <div class="mv-btn draw-mv" id="mv-2-d" onclick="setVote(2,'draw')">N</div>
+            <div class="mv-btn blue-mv" id="mv-2-b" onclick="setVote(2,'blue')">B</div>
+          </div>
+        </div>
+        <div class="mvgroup">
+          <div class="mv-label">Juge 3</div>
+          <div class="mv-btns">
+            <div class="mv-btn red-mv"  id="mv-3-r" onclick="setVote(3,'red')">R</div>
+            <div class="mv-btn draw-mv" id="mv-3-d" onclick="setVote(3,'draw')">N</div>
+            <div class="mv-btn blue-mv" id="mv-3-b" onclick="setVote(3,'blue')">B</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Prolongation -->
+    <div class="prolong-card" id="prolong-card">
+      <div class="prolong-title" id="prolong-title">⏱ Prolongation requise</div>
+      <div class="prolong-sub" id="prolong-sub">Les votes sont à égalité. Déclenchez la prolongation.</div>
+      <div id="prolong-confirm-wrap">
+        <div class="prolong-btns" style="margin-top:4px;">
+          <button class="prolong-btn-cancel" onclick="hideProlong()" data-i18n="btn_cancel">Annuler</button>
+          <button class="prolong-btn-confirm" onclick="triggerOvertime()" data-i18n="btn_overtime">↺ Lancer la prolongation</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Résultat -->
+    <div class="result-card" id="result-card">
+      <div class="sec-title" data-i18n="sec_result">Résultat officiel</div>
+      <div class="result-winner" id="rw-box">
+        <div class="rw-label" id="rw-label">VAINQUEUR</div>
+        <div class="rw-name" id="rw-name">—</div>
+        <div class="rw-tally" id="rw-tally">—</div>
+      </div>
+      <div class="sec-title" data-i18n="sec_dtype">Type de décision</div>
+      <div class="dtype-row">
+        <div class="dtype-pill" onclick="selDtype(this,'Décision unanime')"  data-i18n="dtype_unani">Décision unanime</div>
+        <div class="dtype-pill" onclick="selDtype(this,'Décision partagée')" data-i18n="dtype_split">Décision partagée</div>
+        <div class="dtype-pill" onclick="selDtype(this,'Décision majoritaire')" data-i18n="dtype_maj">Décision majoritaire</div>
+        <div class="dtype-pill" onclick="selDtype(this,'TKO')"               data-i18n="dtype_tko">TKO</div>
+        <div class="dtype-pill" onclick="selDtype(this,'Soumission')"        data-i18n="dtype_sub">Soumission</div>
+        <div class="dtype-pill" onclick="selDtype(this,'Match nul')"         data-i18n="dtype_draw">Match nul</div>
+      </div>
+      <div class="action-row">
+        <button class="btn-act btn-reset" onclick="resetToSetup()">↺ <span data-i18n="btn_new_fight">Nouveau combat</span></button>
+        <button class="btn-act btn-submit-res" id="btn-sub-res" onclick="validateResult()" disabled data-i18n="btn_validate">✓ Proclamer</button>
+      </div>
+    </div>
+
+  </div><!-- /table-inner -->
+</div>
+
+<!-- ════════════════════════════════════
+     PROCLAMATION
+════════════════════════════════════ -->
+<div class="screen" id="s-proclamation">
+  <div class="procl-card">
+    <div class="procl-label" data-i18n="procl_label">Résultat officiel</div>
+    <div class="procl-winner" id="procl-winner-name">—</div>
+    <div class="procl-corner" id="procl-winner-corner"></div>
+    <div class="procl-method" id="procl-method">—</div>
+    <div class="procl-tally" id="procl-tally"></div>
+    <div class="procl-sep"></div>
+    <div class="procl-votes" id="procl-votes"></div>
+    <div class="procl-btn-row">
+      <button class="procl-btn procl-btn-back" onclick="showScr('s-table')" data-i18n="procl_back">← Table</button>
+      <button class="procl-btn procl-btn-new"  onclick="resetToSetup()" data-i18n="btn_new_fight">↺ Nouveau combat</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toast-wrap"></div>
+
+<!-- ════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════ -->
+<script>
+// ══ CONFIG ══════════════════════════════════════════
+// LOCAL  : ws://localhost:8080
+// PROD   : const WS_URL = 'wss://VOTRE-APP.up.railway.app';
+const WS_URL = 'ws://localhost:8080';
+
+// ══ I18N ═════════════════════════════════════════════
+var LANG=(function(){try{return localStorage.getItem('jjc_lang')||'fr';}catch(e){return 'fr';}})();
+var I18N={
+  fr:{
+    setup_sub:'Responsable de Table',lbl_code:'Code tapis',lbl_format:'Format du combat',
+    lbl_fighters:'Combattants',lbl_red:'Coin Rouge',lbl_blue:'Coin Bleu',
+    fmt_std_title:'Tournoi',fmt_std_sub:'1×3 min · +1 min si égalité',
+    fmt_gala_title:'Super Fight',fmt_gala_sub:'3×3 min · +1 round si égalité',
+    btn_create:'Créer le combat',
+    table_title:'Table Officielle',corner_red:'Coin Rouge',corner_blue:'Coin Bleu',
+    sec_judges:'Juges connectés',jbar_waiting:'En attente',jbar_connected:'Connecté',jbar_voted:'A voté',
+    btn_start_voting:'▶ Ouvrir le vote',
+    sec_votes:'Votes des 3 juges',pending:'En attente',
+    sec_manual:'Saisie manuelle',
+    sec_result:'Résultat officiel',sec_dtype:'Type de décision',
+    dtype_unani:'Décision unanime',dtype_split:'Décision partagée',dtype_maj:'Décision majoritaire',
+    dtype_tko:'TKO',dtype_sub:'Soumission',dtype_draw:'Match nul',
+    btn_validate:'✓ Proclamer',btn_new:'↺ Nouveau',btn_new_fight:'Nouveau combat',btn_cancel:'Annuler',
+    btn_overtime:'↺ Lancer la prolongation',
+    prolong_std_title:'⏱ Prolongation requise',prolong_std_sub:'Égalité · Ajoutez 1 minute — décision obligatoire',
+    prolong_gala_title:'⏱ Round supplémentaire',prolong_gala_sub:'Égalité · Ajoutez 1 round de 3 min — décision obligatoire',
+    procl_label:'Résultat officiel',procl_corner_red:'Vainqueur · Coin Rouge',
+    procl_corner_blue:'Vainqueur · Coin Bleu',procl_draw_corner:'Égalité',procl_back:'← Table',
+    winner_lbl:'VAINQUEUR',draw_lbl:'MATCH NUL',
+    toast_created:'Combat créé ✓',toast_vote:'Vote reçu',toast_all_in:'Tous les votes sont là ✓',
+    toast_overtime:'Prolongation lancée',toast_result:'Résultat validé ✓',toast_reset:'Nouveau combat prêt',
+    toast_judge_joined:'juge connecté',toast_judge_left:'juge déconnecté',
+    err_empty:'Renseignez le code tapis et les noms des combattants',
+    err_no_server:'Impossible de contacter le serveur',
+    err_code_taken:'Ce code tapis est déjà utilisé'
+  },
+  en:{
+    setup_sub:'Table Officer',lbl_code:'Mat code',lbl_format:'Fight format',
+    lbl_fighters:'Fighters',lbl_red:'Red Corner',lbl_blue:'Blue Corner',
+    fmt_std_title:'Tournament',fmt_std_sub:'1×3 min · +1 min if tied',
+    fmt_gala_title:'Super Fight',fmt_gala_sub:'3×3 min · +1 round if tied',
+    btn_create:'Create fight',
+    table_title:'Official Table',corner_red:'Red Corner',corner_blue:'Blue Corner',
+    sec_judges:'Connected judges',jbar_waiting:'Waiting',jbar_connected:'Connected',jbar_voted:'Voted',
+    btn_start_voting:'▶ Open voting',
+    sec_votes:"3 judges' votes",pending:'Pending',
+    sec_manual:'Manual entry',
+    sec_result:'Official result',sec_dtype:'Decision type',
+    dtype_unani:'Unanimous decision',dtype_split:'Split decision',dtype_maj:'Majority decision',
+    dtype_tko:'TKO',dtype_sub:'Submission',dtype_draw:'Draw',
+    btn_validate:'✓ Announce',btn_new:'↺ New',btn_new_fight:'New fight',btn_cancel:'Cancel',
+    btn_overtime:'↺ Start overtime',
+    prolong_std_title:'⏱ Overtime required',prolong_std_sub:'Tied · Add 1 minute — decision required',
+    prolong_gala_title:'⏱ Extra round',prolong_gala_sub:'Tied · Add 1 round of 3 min — decision required',
+    procl_label:'Official result',procl_corner_red:'Winner · Red Corner',
+    procl_corner_blue:'Winner · Blue Corner',procl_draw_corner:'Draw',procl_back:'← Table',
+    winner_lbl:'WINNER',draw_lbl:'DRAW',
+    toast_created:'Fight created ✓',toast_vote:'Vote received',toast_all_in:'All votes in ✓',
+    toast_overtime:'Overtime started',toast_result:'Result validated ✓',toast_reset:'New fight ready',
+    toast_judge_joined:'judge connected',toast_judge_left:'judge disconnected',
+    err_empty:'Enter mat code and fighters\' names',
+    err_no_server:'Unable to reach the server',
+    err_code_taken:'This mat code is already in use'
+  }
+};
+function t(k){var d=I18N[LANG]||I18N.fr;return d[k]!==undefined?d[k]:(I18N.fr[k]||k);}
+function setLang(l){LANG=l;try{localStorage.setItem('jjc_lang',l);}catch(e){} document.getElementById('btn-fr').classList.toggle('active',l==='fr'); document.getElementById('btn-en').classList.toggle('active',l==='en'); applyLang();}
+function applyLang(){document.querySelectorAll('[data-i18n]').forEach(function(el){var v=t(el.getAttribute('data-i18n'));if(v)el.textContent=v;});}
+applyLang();
+
+// ══ STATE ════════════════════════════════════════════
+var ws=null;
+var tSt={
+  code:'', red:'', blue:'', fmt:'std',
+  votes:{1:null,2:null,3:null},
+  methods:{},
+  dtype:null,
+  isOvertime:false,
+  judgeIds:{},       // slot(1-3) → judgeId string
+  judgeStatus:{}     // judgeId → 'connected'|'voted'
+};
+
+// ══ SCREENS ══════════════════════════════════════════
+function showScr(id){document.querySelectorAll('.screen').forEach(function(s){s.classList.remove('active');});document.getElementById(id).classList.add('active');}
+
+// ══ FORMAT SELECTOR ══════════════════════════════════
+var selectedFmt='std';
+function selFmt(f){
+  selectedFmt=f;
+  document.getElementById('fmt-std').classList.toggle('sel',f==='std');
+  document.getElementById('fmt-gala').classList.toggle('sel',f==='gala');
+}
+
+// ══ CREATE FIGHT ══════════════════════════════════════
+function createFight(){
+  var code=document.getElementById('inp-code').value.trim().toUpperCase();
+  var red =document.getElementById('inp-red').value.trim().toUpperCase();
+  var blue=document.getElementById('inp-blue').value.trim().toUpperCase();
+  if(!code||!red||!blue){document.getElementById('setup-err').textContent=t('err_empty');return;}
+  document.getElementById('btn-create').disabled=true;
+  document.getElementById('setup-err').textContent='';
+
+  ws=new WebSocket(WS_URL);
+  ws.onopen=function(){
+    ws.send(JSON.stringify({type:'CREATE_FIGHT',code:code,fighters:[red,blue],fmt:selectedFmt}));
+  };
+  ws.onmessage=function(evt){var msg;try{msg=JSON.parse(evt.data);}catch(e){return;}handleMsg(msg);};
+  ws.onclose=function(){handleDisconnect();};
+  ws.onerror=function(){document.getElementById('btn-create').disabled=false;document.getElementById('setup-err').textContent=t('err_no_server');};
+}
+
+// ══ MESSAGE HANDLER ════════════════════════════════════
+function handleMsg(msg){
+  switch(msg.type){
+
+    case 'FIGHT_CREATED':
+      tSt.code=msg.code; tSt.red=msg.fighters[0]; tSt.blue=msg.fighters[1]; tSt.fmt=msg.fmt||selectedFmt;
+      tSt.votes={1:null,2:null,3:null}; tSt.methods={}; tSt.dtype=null; tSt.isOvertime=false;
+      tSt.judgeIds={}; tSt.judgeStatus={};
+      initTableUI();
+      showScr('s-table');
+      toast(t('toast_created'),'ok');
+      break;
+
+    case 'JUDGE_JOINED':
+      handleJudgeJoined(msg.judgeId, msg.judgeCount);
+      break;
+
+    case 'JUDGE_LEFT':
+      handleJudgeLeft(msg.judgeId);
+      break;
+
+    case 'VOTE_RECEIVED':
+      handleVoteReceived(msg.judgeId, msg.vote, msg.voteCount);
+      break;
+
+    case 'ALL_VOTES_IN':
+      handleAllVotesIn(msg.votes);
+      break;
+
+    case 'FIGHT_RESET':
+      // Confirm après reset overtime
+      break;
+
+    case 'ERROR':
+      if(document.querySelector('.screen.active').id==='s-setup'){
+        document.getElementById('btn-create').disabled=false;
+        document.getElementById('setup-err').textContent=msg.message;
+      } else {
+        toast(msg.message,'err');
+      }
+      break;
+  }
+}
+
+function handleDisconnect(){
+  // Ne rien faire si on est en proclamation — résultat déjà acté
+  if(document.querySelector('.screen.active').id==='s-proclamation') return;
+  toast(LANG==='fr'?'Connexion WebSocket perdue':'WebSocket connection lost','err');
+}
+
+// ══ TABLE UI INIT ══════════════════════════════════════
+function initTableUI(){
+  document.getElementById('hdr-code').textContent=tSt.code;
+  document.getElementById('table-hdr-sub').textContent=tSt.code+' · '+(tSt.fmt==='gala'?t('fmt_gala_title'):t('fmt_std_title'));
+  document.getElementById('t-red-name').textContent=tSt.red;
+  document.getElementById('t-blue-name').textContent=tSt.blue;
+  document.getElementById('t-fmt-badge').textContent=tSt.fmt==='gala'?t('fmt_gala_title'):t('fmt_std_title');
+  // Reset vote slots
+  [1,2,3].forEach(function(n){
+    document.getElementById('vs-'+n).className='vslot pending';
+    document.getElementById('vsi-'+n).textContent='⏳';
+    document.getElementById('vsj-'+n).textContent='Juge '+n;
+    document.getElementById('vsr-'+n).textContent=t('pending');
+    document.getElementById('vsm-'+n).textContent='';
+    document.getElementById('vss-'+n).textContent='';
+    ['r','b','d'].forEach(function(k){var e=document.getElementById('mv-'+n+'-'+k);if(e)e.classList.remove('sel');});
+    // Restore draw button in normal mode
+    var nd=document.getElementById('mv-'+n+'-d');if(nd)nd.style.display='';
+  });
+  // Reset judge bar
+  [1,2,3].forEach(function(n){
+    var slot=document.getElementById('jbar-'+n);
+    slot.className='jbar-slot';
+    slot.querySelector('.jbar-label').textContent=t('jbar_waiting');
+    slot.querySelector('.jbar-status').textContent='—';
+  });
+  document.getElementById('result-card').classList.remove('visible');
+  document.getElementById('prolong-card').classList.remove('visible');
+  document.getElementById('btn-sub-res').disabled=true;
+  document.querySelectorAll('.dtype-pill').forEach(function(p){p.classList.remove('sel');});
+  document.getElementById('btn-sub-res').textContent=t('btn_validate');
+}
+
+// ══ JUDGE EVENTS ══════════════════════════════════════
+function handleJudgeJoined(judgeId, judgeCount){
+  // Assign to next free slot
+  var slot=getOrAssignSlot(judgeId);
+  tSt.judgeStatus[judgeId]='connected';
+  var el=document.getElementById('jbar-'+slot);
+  if(el){
+    el.className='jbar-slot connected';
+    el.querySelector('.jbar-label').textContent=t('jbar_connected');
+    el.querySelector('.jbar-status').textContent=judgeId;
+  }
+  // Update vote slot judge label
+  var vsj=document.getElementById('vsj-'+slot); if(vsj) vsj.textContent=judgeId;
+  toast(judgeId+' — '+t('toast_judge_joined'),'inf');
+}
+function handleJudgeLeft(judgeId){
+  var slot=getSlot(judgeId);
+  if(!slot) return;
+  tSt.judgeStatus[judgeId]='disconnected';
+  var el=document.getElementById('jbar-'+slot);
+  if(el){
+    el.className='jbar-slot';
+    el.querySelector('.jbar-label').textContent=t('jbar_waiting');
+    el.querySelector('.jbar-status').textContent='—';
+  }
+  toast(judgeId+' — '+t('toast_judge_left'),'inf');
+}
+
+// ══ VOTE EVENTS ═════════════════════════════════════════
+function handleVoteReceived(judgeId, vote, voteCount){
+  var slot=getOrAssignSlot(judgeId);
+  tSt.votes[slot]=vote.winner;
+  tSt.methods[slot]=vote.method;
+  tSt.judgeStatus[judgeId]='voted';
+
+  // Update judge bar
+  var el=document.getElementById('jbar-'+slot);
+  if(el){
+    el.className='jbar-slot voted';
+    el.querySelector('.jbar-label').textContent=t('jbar_voted');
+    el.querySelector('.jbar-status').textContent=judgeId;
+  }
+
+  reflectVote(slot, vote.winner, vote.method, vote.rounds, vote.totalRed, vote.totalBlue);
+  toast(t('toast_vote')+' — '+judgeId+' ('+voteCount+'/3)','inf');
+}
+
+function handleAllVotesIn(votes){
+  // votes = array of {judgeId, winner, method, rounds, totalRed, totalBlue, ...}
+  // (les objets vote contiennent judgeId directement, envoyés par rooms.js)
+  votes.forEach(function(v){
+    var slot=getOrAssignSlot(v.judgeId);
+    tSt.votes[slot]=v.winner;
+    tSt.methods[slot]=v.method;
+    reflectVote(slot, v.winner, v.method, v.rounds, v.totalRed, v.totalBlue);
+  });
+  computeResult();
+  toast(t('toast_all_in'),'ok');
+}
+
+// ══ VOTE SLOT DISPLAY ══════════════════════════════════
+function reflectVote(n, side, method, rounds, totalRed, totalBlue){
+  var rName=tSt.red||'ROUGE'; var bName=tSt.blue||'BLEU';
+  var name=side==='red'?rName:side==='blue'?bName:(LANG==='fr'?'Match nul':'Draw');
+  var slot=document.getElementById('vs-'+n);
+  if(slot) slot.className='vslot voted-'+side;
+  var icon=side==='red'?'🔴':side==='blue'?'🔵':'🟡';
+  var el=document.getElementById('vsi-'+n); if(el) el.textContent=icon;
+  var er=document.getElementById('vsr-'+n); if(er) er.textContent=name;
+  var em=document.getElementById('vsm-'+n); if(em) em.textContent=method||'';
+  // Score string
+  var sc='';
+  if(method==='Décision'&&rounds&&rounds.length){
+    if(rounds.length>1){
+      sc=rounds.map(function(r,i){return 'R'+(i+1)+': '+(r.rs-r.rp)+'–'+(r.bs-r.bp);}).join(' · ');
+      sc+=' | '+totalRed+'–'+totalBlue;
+    } else {
+      sc=(rounds[0].rs-rounds[0].rp)+'–'+(rounds[0].bs-rounds[0].bp);
+    }
+  }
+  var es=document.getElementById('vss-'+n); if(es) es.textContent=sc;
+  // Sync manual buttons
+  ['r','b','d'].forEach(function(k){var e=document.getElementById('mv-'+n+'-'+k);if(e)e.classList.remove('sel');});
+  var mk=side==='red'?'r':side==='blue'?'b':'d';
+  var mBtn=document.getElementById('mv-'+n+'-'+mk); if(mBtn) mBtn.classList.add('sel');
+}
+
+// ══ MANUAL VOTE (fallback) ══════════════════════════════
+function setVote(n, side){
+  tSt.votes[n]=side;
+  ['r','b','d'].forEach(function(k){var e=document.getElementById('mv-'+n+'-'+k);if(e)e.classList.remove('sel');});
+  var key=side==='red'?'r':side==='blue'?'b':'d';
+  var el=document.getElementById('mv-'+n+'-'+key); if(el) el.classList.add('sel');
+  var rName=tSt.red||'ROUGE'; var bName=tSt.blue||'BLEU';
+  var name=side==='red'?rName:side==='blue'?bName:(LANG==='fr'?'Match nul':'Draw');
+  var slot=document.getElementById('vs-'+n); if(slot) slot.className='vslot voted-'+side;
+  var icon=side==='red'?'🔴':side==='blue'?'🔵':'🟡';
+  var ei=document.getElementById('vsi-'+n); if(ei) ei.textContent=icon;
+  var er=document.getElementById('vsr-'+n); if(er) er.textContent=name;
+  computeResult();
+}
+
+// ══ COMPUTE RESULT ══════════════════════════════════════
+function computeResult(){
+  var v=tSt.votes;
+  var allIn=v[1]&&v[2]&&v[3];
+  var rc=document.getElementById('result-card');
+  var pc=document.getElementById('prolong-card');
+  if(!allIn){rc.classList.remove('visible');pc.classList.remove('visible');return;}
+  rc.classList.add('visible');
+
+  var rC=Object.values(v).filter(function(x){return x==='red';}).length;
+  var bC=Object.values(v).filter(function(x){return x==='blue';}).length;
+  var dC=Object.values(v).filter(function(x){return x==='draw';}).length;
+  var rN=tSt.red||'ROUGE'; var bN=tSt.blue||'BLEU';
+  var autoType='';
+
+  if(rC>=2&&rC>bC){
+    var tally=rC===3?'3-0':dC===1?'2-0-1 ('+rN+')':'2-1 ('+rN+')';
+    setResult('red-win',t('winner_lbl'),rN,tally);
+    autoType=rC===3?'Décision unanime':dC===1?'Décision majoritaire':'Décision partagée';
+    pc.classList.remove('visible');
+  } else if(bC>=2&&bC>rC){
+    var tally2=bC===3?'3-0':dC===1?'2-0-1 ('+bN+')':'2-1 ('+bN+')';
+    setResult('blue-win',t('winner_lbl'),bN,tally2);
+    autoType=bC===3?'Décision unanime':dC===1?'Décision majoritaire':'Décision partagée';
+    pc.classList.remove('visible');
+  } else {
+    setResult('draw',t('draw_lbl'),LANG==='fr'?'Égalité':'Tied','—');
+    autoType='Match nul';
+    if(!tSt.isOvertime) showProlong();
+    else pc.classList.remove('visible'); // pas de re-prolongation
+  }
+
+  // Auto-detect TKO/Sub si majorité
+  var methods=Object.values(tSt.methods).filter(Boolean);
+  var mc={};
+  methods.forEach(function(m){mc[m]=(mc[m]||0)+1;});
+  var top=Object.entries(mc).sort(function(a,b){return b[1]-a[1];})[0];
+  if(top&&(top[0]==='TKO'||top[0]==='Soumission')&&(rC>=2||bC>=2)) autoType=top[0];
+
+  document.querySelectorAll('.dtype-pill').forEach(function(p){p.classList.toggle('sel',p.textContent.trim()===autoType);});
+  tSt.dtype=autoType;
+  checkReady();
+}
+
+function setResult(cls,label,name,tally){
+  document.getElementById('rw-box').className='result-winner '+cls;
+  document.getElementById('rw-label').textContent=label;
+  document.getElementById('rw-name').textContent=name;
+  document.getElementById('rw-tally').textContent=tally;
+}
+function showProlong(){
+  var pc=document.getElementById('prolong-card'); pc.classList.add('visible');
+  var isGala=tSt.fmt==='gala';
+  document.getElementById('prolong-title').textContent=t(isGala?'prolong_gala_title':'prolong_std_title');
+  document.getElementById('prolong-sub').textContent=t(isGala?'prolong_gala_sub':'prolong_std_sub');
+}
+function hideProlong(){document.getElementById('prolong-card').classList.remove('visible');}
+
+function selDtype(el,val){
+  tSt.dtype=val;
+  document.querySelectorAll('.dtype-pill').forEach(function(p){p.classList.remove('sel');});
+  el.classList.add('sel');
+  checkReady();
+}
+function checkReady(){
+  var ok=tSt.votes[1]&&tSt.votes[2]&&tSt.votes[3]&&tSt.dtype;
+  document.getElementById('btn-sub-res').disabled=!ok;
+}
+
+// ══ START VOTING ══════════════════════════════════════
+function startVoting(){
+  if(!ws||ws.readyState!==WebSocket.OPEN){toast(LANG==='fr'?'Connexion perdue':'Connection lost','err');return;}
+  ws.send(JSON.stringify({type:'START_VOTING',code:tSt.code,fighters:[tSt.red,tSt.blue],fmt:tSt.fmt}));
+  document.getElementById('btn-start-voting').disabled=true;
+  document.getElementById('btn-start-voting').textContent=LANG==='fr'?'Vote ouvert…':'Voting open…';
+  toast(LANG==='fr'?'Signal envoyé aux juges':'Signal sent to judges','ok');
+}
+
+// ══ OVERTIME ══════════════════════════════════════════
+function triggerOvertime(){
+  if(!ws||ws.readyState!==WebSocket.OPEN){toast(LANG==='fr'?'Connexion perdue':'Connection lost','err');return;}
+  // Réinitialiser les votes
+  tSt.votes={1:null,2:null,3:null}; tSt.methods={}; tSt.dtype=null; tSt.isOvertime=true;
+  [1,2,3].forEach(function(n){
+    document.getElementById('vs-'+n).className='vslot pending';
+    document.getElementById('vsi-'+n).textContent='⏳';
+    document.getElementById('vsr-'+n).textContent=t('pending')+' · OT';
+    document.getElementById('vsm-'+n).textContent='';
+    document.getElementById('vss-'+n).textContent='';
+    ['r','b','d'].forEach(function(k){var e=document.getElementById('mv-'+n+'-'+k);if(e)e.classList.remove('sel');});
+    // Cacher le bouton N (draw) en prolongation
+    var nd=document.getElementById('mv-'+n+'-d');if(nd)nd.style.display='none';
+  });
+  document.getElementById('result-card').classList.remove('visible');
+  document.getElementById('prolong-card').classList.remove('visible');
+  document.querySelectorAll('.dtype-pill').forEach(function(p){p.classList.remove('sel');});
+  document.getElementById('btn-sub-res').disabled=true;
+  document.getElementById('btn-start-voting').disabled=false;
+  document.getElementById('btn-start-voting').textContent=t('btn_start_voting');
+
+  // Réinitialiser la salle serveur + envoyer OVERTIME aux juges
+  ws.send(JSON.stringify({type:'RESET_FIGHT',code:tSt.code}));
+  ws.send(JSON.stringify({type:'START_OVERTIME',code:tSt.code,fighters:[tSt.red,tSt.blue],fmt:tSt.fmt}));
+  toast(t('toast_overtime'),'inf');
+}
+
+// ══ VALIDATE & PROCLAMATION ════════════════════════════
+function validateResult(){
+  var v=tSt.votes;
+  var rN=tSt.red||'ROUGE'; var bN=tSt.blue||'BLEU';
+  var rC=Object.values(v).filter(function(x){return x==='red';}).length;
+  var bC=Object.values(v).filter(function(x){return x==='blue';}).length;
+  var dC=Object.values(v).filter(function(x){return x==='draw';}).length;
+
+  var winnerName,winnerCls,cornerText,tally;
+  if(rC>bC){
+    winnerName=rN; winnerCls='red-win'; cornerText=t('procl_corner_red');
+    tally=LANG==='fr'?(rC===3?'Décision unanime — 3 voix à 0':dC===1?'Décision majoritaire — 2 voix, 1 nul':'Décision partagée — 2 voix contre 1'):(rC===3?'Unanimous — 3-0':dC===1?'Majority — 2-0-1':'Split — 2-1');
+  } else if(bC>rC){
+    winnerName=bN; winnerCls='blue-win'; cornerText=t('procl_corner_blue');
+    tally=LANG==='fr'?(bC===3?'Décision unanime — 3 voix à 0':dC===1?'Décision majoritaire — 2 voix, 1 nul':'Décision partagée — 2 voix contre 1'):(bC===3?'Unanimous — 3-0':dC===1?'Majority — 2-0-1':'Split — 2-1');
+  } else {
+    winnerName=LANG==='fr'?'Match nul':'Draw'; winnerCls='draw-win'; cornerText=t('procl_draw_corner'); tally='—';
+  }
+  var method=tSt.dtype||'Décision';
+
+  document.getElementById('procl-winner-name').textContent=winnerName;
+  document.getElementById('procl-winner-name').className='procl-winner '+winnerCls;
+  document.getElementById('procl-winner-corner').textContent=cornerText;
+  document.getElementById('procl-method').textContent=method;
+  document.getElementById('procl-method').className='procl-method '+winnerCls;
+  document.getElementById('procl-tally').textContent=tally;
+
+  // Vote slots
+  var icons={red:'🔴',blue:'🔵',draw:'🟡'};
+  var names={red:rN,blue:bN,draw:LANG==='fr'?'Nul':'Draw'};
+  var html='';
+  [1,2,3].forEach(function(n){
+    var side=v[n]||'draw';
+    var jLabel=document.getElementById('vsj-'+n)?document.getElementById('vsj-'+n).textContent:'Juge '+n;
+    html+='<div class="procl-vote-slot pv-'+side+'">'+
+      '<div class="procl-vote-icon">'+icons[side]+'</div>'+
+      '<div style="font-size:11px;color:#fff;font-weight:700;margin-bottom:2px">'+names[side]+'</div>'+
+      '<div class="procl-vote-judge">'+jLabel+'</div>'+
+      '</div>';
+  });
+  document.getElementById('procl-votes').innerHTML=html;
+  toast(t('toast_result'),'ok');
+  showScr('s-proclamation');
+}
+
+// ══ RESET ════════════════════════════════════════════
+function resetToSetup(){
+  if(ws&&ws.readyState===WebSocket.OPEN){
+    ws.send(JSON.stringify({type:'CLOSE_FIGHT',code:tSt.code}));
+    ws.close();
+  }
+  ws=null;
+  document.getElementById('btn-create').disabled=false;
+  document.getElementById('setup-err').textContent='';
+  document.getElementById('btn-start-voting').disabled=false;
+  document.getElementById('btn-start-voting').textContent=t('btn_start_voting');
+  toast(t('toast_reset'),'inf');
+  showScr('s-setup');
+}
+
+// ══ SLOT MANAGEMENT ══════════════════════════════════
+// Assigne et retrouve les slots de juge (1,2,3) par judgeId
+function getOrAssignSlot(judgeId){
+  for(var s in tSt.judgeIds){if(tSt.judgeIds[s]===judgeId)return parseInt(s);}
+  for(var i=1;i<=3;i++){if(!tSt.judgeIds[i]){tSt.judgeIds[i]=judgeId;return i;}}
+  return 1; // fallback
+}
+function getSlot(judgeId){
+  for(var s in tSt.judgeIds){if(tSt.judgeIds[s]===judgeId)return parseInt(s);}
+  return null;
+}
+
+// ══ TOAST ════════════════════════════════════════════
+function toast(msg,type){
+  type=type||'inf';
+  var w=document.getElementById('toast-wrap');
+  var el=document.createElement('div'); el.className='toast '+type;
+  el.innerHTML='<span>'+({ok:'✅',err:'❌',inf:'ℹ️'}[type]||'ℹ️')+'</span><span>'+msg+'</span>';
+  w.appendChild(el);
+  setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){el.remove();},300);},3500);
+}
+</script>
+</body>
+</html>
