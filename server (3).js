@@ -6,7 +6,7 @@
  *
  * CLIENT → SERVEUR
  * ─────────────────────────────────────────────────────────
- * { type: "CREATE_FIGHT", code, fighters: [string, string] }
+ * { type: "CREATE_FIGHT", code, fighters: [string, string], fmt: 'std'|'gala' }
  * { type: "RESET_FIGHT",  code }
  * { type: "CLOSE_FIGHT",  code }
  * { type: "JOIN",         code, judgeId }
@@ -14,8 +14,8 @@
  *
  * SERVEUR → CLIENT
  * ─────────────────────────────────────────────────────────
- * { type: "FIGHT_CREATED",  code, fighters }
- * { type: "JOINED",         judgeId, fighters, judgeCount }
+ * { type: "FIGHT_CREATED",  code, fighters, fmt }
+ * { type: "JOINED",         judgeId, fighters, fmt, judgeCount }
  * { type: "VOTE_RECEIVED",  judgeId, vote, voteCount }
  * { type: "ALL_VOTES_IN",   votes: [ {judgeId, vote}, ... ] }
  * { type: "FIGHT_RESET",    fighters }
@@ -94,22 +94,21 @@ function handleMessage(ws, msg) {
 
     // ── Responsable : créer un combat ────────────────────────────────────────
     case 'CREATE_FIGHT': {
-      const { code, fighters } = msg;
+      const { code, fighters, fmt } = msg;
 
-      const { fmt } = msg;
       if (!code || !Array.isArray(fighters) || fighters.length !== 2) {
         return send(ws, { type: 'ERROR', message: 'CREATE_FIGHT : code et fighters[2] requis.' });
       }
 
-      const result = createRoom(code, ws, fighters);
+      // FIX : fmt passé directement à createRoom qui le stocke dans la salle
+      const result = createRoom(code, ws, fighters, fmt);
       if (!result.ok) {
         return send(ws, { type: 'ERROR', message: result.error });
       }
-      // Stocker le format dans la salle
-      result.room && (result.room.fmt = fmt || 'std');
 
-      console.log(`[server] Salle créée : "${code.toUpperCase()}" | ${fighters[0]} vs ${fighters[1]} | fmt:${fmt||'std'}`);
-      send(ws, { type: 'FIGHT_CREATED', code: code.toUpperCase(), fighters, fmt: fmt || 'std' });
+      const storedFmt = fmt || 'std';
+      console.log(`[server] Salle créée : "${code.toUpperCase()}" | ${fighters[0]} vs ${fighters[1]} | fmt:${storedFmt}`);
+      send(ws, { type: 'FIGHT_CREATED', code: code.toUpperCase(), fighters, fmt: storedFmt });
       break;
     }
 
@@ -121,10 +120,11 @@ function handleMessage(ws, msg) {
       }
       const roomSV = foundSV.room;
       console.log(`[server] START_VOTING sur "${roomSV.code}" — ${roomSV.judges.size} juge(s)`);
+      // FIX : fmt lu depuis la salle, pas depuis le message client
       broadcast(roomSV.judges.values(), {
         type: 'START_VOTING',
         fighters: msg.fighters || roomSV.fighters,
-        fmt: msg.fmt || 'std',
+        fmt: roomSV.fmt || 'std',
       });
       break;
     }
@@ -137,10 +137,11 @@ function handleMessage(ws, msg) {
       }
       const roomOT = foundOT.room;
       console.log(`[server] START_OVERTIME sur "${roomOT.code}"`);
+      // FIX : fmt lu depuis la salle, pas depuis le message client
       broadcast(roomOT.judges.values(), {
         type: 'OVERTIME',
         fighters: roomOT.fighters,
-        fmt: msg.fmt || 'std',
+        fmt: roomOT.fmt || 'std',
       });
       break;
     }
@@ -189,9 +190,9 @@ function handleMessage(ws, msg) {
       const { room } = result;
       const judgeCount = room.judges.size;
 
-      console.log(`[server] ${judgeId} a rejoint "${code.toUpperCase()}" (${judgeCount}/3 juges)`);
+      console.log(`[server] ${judgeId} a rejoint "${code.toUpperCase()}" (${judgeCount}/3 juges) | fmt:${room.fmt}`);
 
-      // Confirmer au juge
+      // Confirmer au juge — fmt correctement lu depuis la salle
       send(ws, {
         type: 'JOINED',
         judgeId,

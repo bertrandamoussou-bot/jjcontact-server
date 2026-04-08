@@ -15,9 +15,10 @@ const ROOM_TTL_MS = 4 * 60 * 60 * 1000;
  * @param {string} code        - Identifiant du tapis (ex: "TAPIS1")
  * @param {WebSocket} hostWs   - Socket du responsable de table
  * @param {string[]} fighters  - [nomA, nomB]
+ * @param {string} fmt         - Format du combat : 'std' (Tournoi) ou 'gala' (Super Fight)
  * @returns {{ ok: boolean, error?: string }}
  */
-function createRoom(code, hostWs, fighters) {
+function createRoom(code, hostWs, fighters, fmt) {
   const key = normalizeCode(code);
   if (rooms.has(key)) {
     return { ok: false, error: `La salle "${code}" existe déjà.` };
@@ -27,6 +28,7 @@ function createRoom(code, hostWs, fighters) {
     code: key,
     host: hostWs,
     fighters,                      // ["Athlete A", "Athlete B"]
+    fmt: fmt || 'std',             // FIX : stocker le format dès la création
     judges: new Map(),             // judgeId → WebSocket
     votes: new Map(),              // judgeId → VoteObject
     createdAt: Date.now(),
