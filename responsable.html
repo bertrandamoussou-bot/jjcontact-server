@@ -834,12 +834,11 @@ function triggerOvertime(){
   document.getElementById('prolong-card').classList.remove('visible');
   document.querySelectorAll('.dtype-pill').forEach(function(p){p.classList.remove('sel');});
   document.getElementById('btn-sub-res').disabled=true;
-  document.getElementById('btn-start-voting').disabled=false;
-  document.getElementById('btn-start-voting').textContent=t('btn_start_voting');
-
   // Réinitialiser la salle serveur + envoyer OVERTIME aux juges
   ws.send(JSON.stringify({type:'RESET_FIGHT',code:tSt.code}));
   ws.send(JSON.stringify({type:'START_OVERTIME',code:tSt.code,fighters:[tSt.red,tSt.blue],fmt:tSt.fmt}));
+  document.getElementById('btn-start-voting').disabled=true;
+  document.getElementById('btn-start-voting').textContent=LANG==='fr'?'Overtime lancé…':'Overtime started…';
   toast(t('toast_overtime'),'inf');
 }
 
