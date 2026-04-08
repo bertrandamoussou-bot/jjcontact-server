@@ -573,7 +573,9 @@ function showErrScr(msg){
 
 // ══ INIT VOTE ════════════════════════════════════════
 function initVote(){
+  console.log('[JJC] initVote fmt='+jSt.fmt+' isOvertime='+jSt.isOvertime);
   var nR=(jSt.fmt==='gala'&&!jSt.isOvertime)?3:1;
+  console.log('[JJC] nR='+nR);
   jRounds=Array.from({length:nR},function(){return{rs:9,bs:9,rp:0,bp:0};});
   jRound=0; jSt.method=null; jSt.vote=null;
   document.getElementById('v-judge-tag').textContent=jSt.judgeId;
