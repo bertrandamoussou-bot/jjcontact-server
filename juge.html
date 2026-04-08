@@ -644,7 +644,7 @@ function selectMethod(method){
     if(rsw) rsw.style.display=jSt.fmt==='gala'?'':'none';
     // Reset sélection
     jSt.roundStop=null;
-    [1,2,3].forEach(function(n){var b=document.getElementById('rs-btn-'+n);if(b)b.classList.remove('sel');});
+    [1,2,3].forEach(function(n){var b=document.getElementById('rs-btn-'+n);if(b){b.classList.remove('sel');b.style.display=(jSt.isOvertime&&n>1)?'none':'';}});
   }
 }
 
@@ -657,8 +657,8 @@ function renderRTabs(){
 function updateRoundActionBtn(){
   var btn=document.getElementById('btn-round-action'); if(!btn) return;
   var isGala=jSt.fmt==='gala';
-  var lastRound=isGala?2:0; // index 0-based du dernier round
-  if(!isGala||jRound===lastRound){
+  var lastRound=jRounds.length-1; // index 0-based du dernier round
+  if(jRound===lastRound){
     btn.textContent=t('btn_go_winner');
     btn.onclick=function(){goToWinner();};
   } else {
