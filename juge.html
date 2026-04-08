@@ -531,13 +531,14 @@ function handleMsg(msg){
 
     case 'START_VOTING':
       if(msg.fighters){jSt.red=msg.fighters[0];jSt.blue=msg.fighters[1];}
-      if(msg.fmt) jSt.fmt=msg.fmt;
+      jSt.fmt=msg.fmt||jSt.fmt||'std';
       jSt.isOvertime=false;
       initVote();
       showScr('s-vote');
       break;
 
     case 'OVERTIME':
+      jSt.fmt=msg.fmt||jSt.fmt||'std';
       jSt.isOvertime=true;
       initVote();
       var ot=document.getElementById('ot-banner'); ot.style.display='';
